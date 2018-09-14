@@ -22,8 +22,7 @@ mode: `name`, ссылка в браузере `http://127.0.0.1:81/view_doc.htm
 1. https://github.com/Alexander-Lv/WebTutor  
 2. https://ensi.gitbooks.io/progressive-webtutor/content/  
 3. https://maksimyurkov.gitbooks.io/web-components-in-webtutor/content/  
-4. Руководство системного администратора  
-WebTutor https://clck.ru/ELyDU   
+4. Руководство системного администратора WebTutor https://clck.ru/ELyDU   
 
 
 Дизайнер -> Агенты сервера -> new  
