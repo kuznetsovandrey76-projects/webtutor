@@ -1,7 +1,12 @@
+Шаблон документа
 ``` javascript
 <%
-current_date = Date();
+current_date = StrDate(Date());
+
 user = curUserID;
+
+str_1 = StrRangePos(StrInt(curUserID), 0, 16) 
+str_2 = StrRangePos(StrInt(curUserID), 16, 19)
 %>
 
 <!-- форма -->
@@ -12,6 +17,7 @@ user = curUserID;
 <input type="submit" value="Отправить" id="send">
 
 <script>
+// console.log('<%=current_date%>')
 
 remoteAction = function (actionObject) {
 	try {
@@ -99,28 +105,26 @@ remoteAction = function (actionObject) {
 	}
 }
 
-
-
-
 $('#send').click(function() {
 	var theme = $('#theme').val();
 	var message = $('#message').val();
 
 	if (theme && message) {
-		console.log('Тема обращения:', theme);
-		console.log('Обращение:', message);
+		// console.log('Тема обращения:', theme);
+		// console.log('Обращение:', message);
 
 		// возврат после отправки 
 		var url = "http://127.0.0.1:81/view_doc.html?mode=task_4";
 
 		//работа с удаленным действием 
 		regAction = {
-			name : "task_4_action", //код удаленного действия
+			name : "task_4", //код удаленного действия
 			options: [{ name: "message", value: message },
 					 { name: "theme", value: theme },
-					 { name: "creation_date", value: ''},
-					 { name: "collaborator_id", value: <%=user%>}
+					 { name: "creation_date", value: '<%=current_date%>'},
+					 { name: "collaborator_id", value: '' + <%=str_1%> + <%=str_2%>}
 					 ],
+
 
 			callback_f : function(_doc){
 				waitWindow.hide();
@@ -139,9 +143,12 @@ $('#send').click(function() {
 
 		remoteAction(regAction);
 
-		// подтверждение что все отправлено
-		alert('все ok');
+		// console.log(regAction.options[2])
 
+		// подтверждение что все отправлено
+		alert('Ваше обращение принято');
+
+		// возврат на страницу
 		$(location).attr('href',url);
 	} else {
 		alert('Заполните все поля');
@@ -149,4 +156,27 @@ $('#send').click(function() {
 });
 
 </script>
+```
+Удаленное действие
+``` javascript
+docPOL = OpenNewDoc( 'x-local://udt/udt_cc_task_6_doc.xmd');
+
+docPOL.TopElem.theme = theme;
+docPOL.TopElem.message = message;
+docPOL.TopElem.creation_date = creation_date;
+docPOL.TopElem.collaborator_id = collaborator_id
+docPOL.BindToDb();
+docPOL.Save();
+
+MESSAGE = "Cохранение прошло успешно";
+
+msgToAdmin = 'Тема: ' + theme  + '. Обращение: ' + message;
+
+// tools.create_notification('task_4_type', collaborator_id, {theme: theme, message: message});
+tools.create_notification('task_4_type', collaborator_id, msgToAdmin);
+```
+Шаблон уведомлений
+``` javascript
+Обращение от: <%=objDoc.fullname%>, id - <%=objDoc.id%>  
+<%=Text%>
 ```
