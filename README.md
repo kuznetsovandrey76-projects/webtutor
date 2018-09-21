@@ -17,13 +17,11 @@ mode: `name`, ссылка в браузере `http://127.0.0.1:81/view_doc.htm
 зона: `main`  
 шаблон: выбираем созданный "шаблон документа"  
 
-
-
-1. https://github.com/Alexander-Lv/WebTutor  
-2. https://ensi.gitbooks.io/progressive-webtutor/content/  
-3. https://maksimyurkov.gitbooks.io/web-components-in-webtutor/content/  
-4. Руководство системного администратора WebTutor https://clck.ru/ELyDU   
-5. https://github.com/maksimyurkov/webtutor-docs - неофициальное рук-во  
+1. https://github.com/Alexander-Lv/WebTutor - Запросы XQuery.   
+2. https://ensi.gitbooks.io/progressive-webtutor/content/ - tutorial    
+3. https://github.com/maksimyurkov/webtutor-docs - неофициальная документация   
+...
+4. https://clck.ru/ELyDU - руководство системного администратора WebTutor   
 
 Дизайнер -> Агенты сервера -> new  
 код: `test_agent_001`  
