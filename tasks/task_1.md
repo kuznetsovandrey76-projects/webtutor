@@ -38,7 +38,8 @@
 		.collaborator-info__table td{
 			width: 40%;
 		}
-		.collaborator-id {
+		.collaborator-id,
+		#collaborator-info--id {
 			display: none;
 		}
 		
@@ -120,6 +121,9 @@
 	<div id="collaborator-info" class="collaborator-info">
 		<table class="collaborator-info__table">
 			<tr>
+				<td id="collaborator-info--id"></td>
+			</tr>
+			<tr>
 				<td>Фамилия:</td>
 				<td id="collaborator-info--lastname"></td>
 				<td><button id="edit-collaborator-info--lastname">Редактировать</button></td>
@@ -167,6 +171,92 @@
 	</div>
 	<script>
 		$( document ).ready(function() {
+			// Для удаленного действия
+			remoteAction = function (actionObject) {
+				try {
+					if (remoteAction != undefined) {
+						var returnObject = {};
+						var soapRequestBody;
+						var soapServerUrl = actionObject.url != undefined ? actionObject.url : '/remote_actions_wsdl.xml';
+						var soapFormat = actionObject.format != undefined ? actionObject.format : 'json';
+
+						soapRequestBody  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+						soapRequestBody += "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">";
+						soapRequestBody += "<soap:Body>";
+						soapRequestBody += "<" + actionObject.name + " xmlns=\"http://www.websoft.ru/\">";
+						soapRequestBody += "<format>" + soapFormat + "</format>";
+						if (actionObject.options != undefined) {
+							for (var i = 0; i < actionObject.options.length; i++) {
+								soapRequestBody += "<" + actionObject.options[i].name + ">" + actionObject.options[i].value + "</" + actionObject.options[i].name + ">";
+							}
+						}
+						soapRequestBody += "</" + actionObject.name + ">";
+						soapRequestBody += "</soap:Body>";
+						soapRequestBody += "</soap:Envelope>";
+
+						$.ajax({
+							type: "POST",
+							url: soapServerUrl,
+							contentType: "text/xml",
+							dataType: "xml",
+							data: soapRequestBody,
+							success: processSuccess,
+							error: processError
+						});
+
+						function processSuccess (data, status, req) {
+							if (status == "success") {
+								var returnObject = {
+									error: data.getElementsByTagName('error')[0].firstChild,
+									type: data.getElementsByTagName('type')[0].firstChild,
+									messageText: data.getElementsByTagName('messageText')[0].firstChild,
+									result: data.getElementsByTagName('result')[0].firstChild
+								};
+								try{
+									returnObject.error = returnObject.error.nodeValue;
+								}
+								catch(_ex){}
+								try{
+									returnObject.type = returnObject.type.nodeValue;
+								}
+								catch(_ex){}
+								try{
+									returnObject.messageText = returnObject.messageText.nodeValue;
+								}
+								catch(_ex){}
+								try{
+									returnObject.result = returnObject.result.nodeValue;
+								}
+								catch(_ex){}
+
+								if (actionObject.callback_f != undefined) {
+									actionObject.callback_f(returnObject);
+								}
+
+								return returnObject;
+							}
+							else {
+								throw status;
+							}
+						}
+
+						function processError(data, status, req) {
+							throw req.responseText;
+						}
+					}
+					else
+					{
+						throw '00'
+					}
+				}
+				catch(_exeption) {
+					returnObject = {error: 1, messageText: _exeption};
+					if (typeof(actionObject.callback_f) != 'undefined') {
+						actionObject.callback_f(returnObject);
+					}
+					return returnObject ;
+				}
+			};
 			// Скрываем блоки выбора ==============
 			(function () {
 				$('#org-block').hide()
@@ -175,7 +265,7 @@
 				$('#collaborator-info').hide()
 				$('#collaborator-update-org').hide()
 				$('#collaborator-update-division').hide()				
-			})()
+			})();
 			// ====================================
        		// ВЫБОРКИ ============================
        		// Организации
@@ -484,6 +574,7 @@
 							// console.log(user)
 
 							$('#collaborator-info').show()
+							$('#collaborator-info--id').text(user.id)
 							$('#collaborator-info--lastname').text(user.lastname)
 							$('#collaborator-info--firstname').text(user.firstname)
 							$('#collaborator-info--middlename').text(user.middlename)
@@ -493,8 +584,48 @@
 					});
 
 					$('#collaborator-save').click(function() {
-							// !!! ОБНОВЛЯЕМ ДАННЫЕ НА СЕРВЕРЕ 
-							$('#collaborator-info').hide()
+						// !!! ОБНОВЛЯЕМ ДАННЫЕ НА СЕРВЕРЕ 
+						$('#collaborator-info').hide()
+
+						var info_arr = $(this).context.parentNode.parentNode.parentNode.children
+						// [id, lastname, firstname, middlename, position, org, division, ...]
+
+						var id = info_arr[0].textContent.replace( /\s/g, "")
+						var lastname = info_arr[1].children[1].textContent
+						var firstname = info_arr[2].children[1].textContent
+						var middlename = info_arr[3].children[1].textContent
+						var position = info_arr[4].children[1].textContent
+						var org = info_arr[5].children[1].textContent
+						var division = info_arr[6].children[1].textContent
+
+						var fullname = lastname + ' ' + firstname + ' ' + middlename 
+
+						//работа с удаленным действием 
+						regAction = {
+							name : "re_task_finally_1", //код удаленного действия
+							options: [{ name: "id", value: id },
+									 { name: "fullname", value: fullname },
+									 { name: "position", value: position},
+									 { name: "org", value: org},
+									 { name: "division", value: division}
+									 ],
+
+							callback_f : function(_doc){
+								waitWindow.hide();
+								if (_doc.error == 0)
+								{
+									alert(1)
+								}
+								else
+								{
+									alert(0)
+								}
+							}
+						} 
+						// пример коллбэка на ответ, его может не быть, 
+						// _doc - возвращаемый объект, содержит поля error, type, messageText, result
+
+						remoteAction(regAction);
 					});
 
 						// EDIT COLLABORATOR +++++++++++++++++++++++++++++++++++++++
@@ -1022,4 +1153,30 @@ for (elem in data)
 		name: elem.name.Value 
 	});		
 }
+```
+Удаленное действие re_task_finally_1
+``` javascript
+// Создать переменные: 
+// id - string
+// fullname - string
+// position - string
+// org - string
+// division - string
+
+// Данные на которые изменили 
+alert(id)
+alert(fullname)
+alert(position)
+alert(org)
+alert(division)
+
+// По id заходим в карточку сотрудника
+__item = ArrayOptFirstElem(XQuery("for $elem in collaborators where $elem/id=" + id + " return $elem"));
+if (__item != undefined)
+{
+	// Изменяем данные
+	__item.fullname = fullname
+}
+
+MESSAGE = "Cохранение прошло успешно";
 ```
