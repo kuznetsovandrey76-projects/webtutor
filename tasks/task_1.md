@@ -1,291 +1,808 @@
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Task_1</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<style>	
-		.search-block {
-			width: 80%;
-			margin: 0 auto;
-			background: lightblue;
-			border: 1px solid black;
-			position: relative;
-			z-index: 5;
-			padding: 5px;
-		}
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<title>Task_1</title>
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+			<style>	
+				.search-block {
+					width: 80%;
+					margin: 0 auto;
+					background: lightblue;
+					border: 1px solid black;
+					position: relative;
+					z-index: 1;
+					padding: 5px;
+				}
 
-		.org-block,
-		.division-block,
-		.collaborator-info {
-			background: khaki;
-			border: 1px solid black;
-			position: absolute;
-			top: 80px;	
-			left: 160px;
-			z-index: 10;
-			width: 80%;
-			padding: 5px;
-		}
-		.collaborator {
-			cursor: pointer;
-		}
-		.result {
-			width: 80%;
-			margin: 10px auto;
-		}
-		.collaborator-info__table td{
-			width: 40%;
-		}
-		.collaborator-id,
-		#collaborator-info--id {
-			display: none;
-		}
-		
-		.collaborator-update-org,
-		.collaborator-update-division {
-			background: lightgreen;
-			border: 1px solid black;
-			position: absolute;
-			top: 80px;	
-			left: 160px;
-			z-index: 20;
-			width: 40%;
-			padding: 5px;
-		}
+				.org-block,
+				.division-block,
+				.collaborator-info {
+					background: khaki;
+					border: 1px solid black;
+					position: absolute;
+					top: 80px;	
+					left: 160px;
+					z-index: 5;
+					width: 80%;
+					padding: 5px;
+				}
+				.collaborator {
+					cursor: pointer;
+				}
+				.result {
+					width: 80%;
+					margin: 10px auto;
+					position: relative;
+					z-index: 1;
+					background: white;
+				}
+				.collaborator-info__table td{
+					width: 40%;
+				}
+				.collaborator-id,
+				#collaborator-info--id {
+					display: none;
+				}
+				
+				.collaborator-update-org,
+				.collaborator-update-division {
+					background: lightgreen;
+					border: 1px solid black;
+					position: absolute;
+					top: 80px;	
+					left: 160px;
+					z-index: 20;
+					width: 40%;
+					padding: 5px;
+				}
+				.block {
+					background: rgba(123, 123, 43, .3);
+					position: absolute;
+					width: 100%;
+					height: 100%;
+					z-index: 0;
+					top: 0;
+					left: 0;
+				}
 
-		/* ДОП */
-	    #filter-table{
-	        width: 100%;
-	    }
-	    #filter-table th{
-	        background-color: #dadada;
-	    }
-	    #filter-table td, #filter-table th{
-	        padding: 5px;
-	        border-bottom: 1px solid #ccc;
-	    }
-	</style>
-</head>
-<body>	
+				/* ДОП */
+			    #filter-table{
+			        width: 100%;
+			    }
+			    #filter-table th{
+			        background-color: #dadada;
+			    }
+			    #filter-table td, #filter-table th{
+			        padding: 5px;
+			        border-bottom: 1px solid #ccc;
+			    }
+			</style>
+		</head>
+		<body>	
 
-	<!-- SEARCH -->
-	<div id="search-block" class="search-block">
-		<table>
-			<tr>
-				<td><label for="fullname">ФИО:</label>	</td>
-				<td><input class="input-field" id="fullname" type="text"></td>
-			</tr>
-			<tr>
-				<td><label for="position">Должность:</label></td>
-				<td><input class="input-field" id="position" type="text"></td>
-			</tr>
-			<tr id="search-block__org">
-				<td><label for="org">Организация:</label></td>
-				<td><input class="input-field" id="org-button" type="button" value="Выбрать"></td>
-			</tr>
-			<tr id="search-block__division">
-				<td><label for="division">Подразделение:</label></td>
-				<td><input class="input-field" id="division-button" type="button" value="Выбрать"></td>
-			</tr>
-			<tr>
-				<td><button id="search">Найти</button></td>
-				<td></td>
-			</tr>
-		</table>
-	</div>
-	<!-- ORG -->
-	<div id="org-block" class="org-block">
-		<div id="find-org-block">
-		</div>
-	</div>
-	<!-- DIVISION -->
-	<div id="division-block" class="division-block">	
-		<div id="find-division-block">
-		</div>		
-	</div>
-	<!-- RESULT -->
-	<div id="result" class="result">
-		<table id="filter-table">
-		    <tr>
-		        <th class="collaborator-id">id</th>
-		        <th>ФИО</th>
-		        <th>Должность</th>
-		        <th>Организация</th>
-		        <th>Подразделение</th>
-		    </tr>
-		</table>
-	</div>
-	<!-- MODAL -->
-	<div id="collaborator-info" class="collaborator-info">
-		<table class="collaborator-info__table">
-			<tr>
-				<td id="collaborator-info--id"></td>
-			</tr>
-			<tr>
-				<td>Фамилия:</td>
-				<td id="collaborator-info--lastname"></td>
-				<td><button id="edit-collaborator-info--lastname">Редактировать</button></td>
-			</tr>
-			<tr>
-				<td>Имя:</td>
-				<td id="collaborator-info--firstname"></td>
-				<td><button id="edit-collaborator-info--firstname">Редактировать</button></td>
-			</tr>
-			<tr>
-				<td>Отчество:</td>
-				<td id="collaborator-info--middlename"></td>
-				<td><button id="edit-collaborator-info--middlename">Редактировать</button></td>
-			</tr>
-			<tr>
-				<td>Должность:</td>
-				<td id="collaborator-info--position"></td>
-				<td><button id="edit-collaborator-info--position">Редактировать</button></td>
-			</tr>
-			<tr>
-				<td>Организация:</td>
-				<td id="collaborator-info--org"></td>
-				<td><button id="edit-collaborator-info--org">Редактировать</button></td>
-			</tr>
-			<tr>
-				<td>Подразделение:</td>
-				<td id="collaborator-info--division"></td>
-				<td><button id="edit-collaborator-info--division">Редактировать</button></td>
-			</tr>
-			<tr>
-				<td><button id="collaborator-save">Сохранить</button></td>
-				<td></td>
-			</tr>
-		</table>
-	</div>
-	<!-- MODAL select ORG -->
-	<div id="collaborator-update-org" class="collaborator-update-org">
-		<div id="select-collaborator-update-org">
-		</div>
-	</div>
-	<!-- MODAL select DIVISION -->
-	<div id="collaborator-update-division" class="collaborator-update-division">
-		<div id="select-collaborator-update-division">
-		</div>
-	</div>
-	<script>
-		$( document ).ready(function() {
-			// Для удаленного действия
-			remoteAction = function (actionObject) {
-				try {
-					if (remoteAction != undefined) {
-						var returnObject = {};
-						var soapRequestBody;
-						var soapServerUrl = actionObject.url != undefined ? actionObject.url : '/remote_actions_wsdl.xml';
-						var soapFormat = actionObject.format != undefined ? actionObject.format : 'json';
+			<!-- SEARCH -->
+			<div id="search-block" class="search-block">
+				<table>
+					<tr>
+						<td><label for="fullname">ФИО:</label>	</td>
+						<td><input class="input-field" id="fullname" type="text"></td>
+					</tr>
+					<tr>
+						<td><label for="position">Должность:</label></td>
+						<td><input class="input-field" id="position" type="text"></td>
+					</tr>
+					<tr id="search-block__org">
+						<td><label for="org">Организация:</label></td>
+						<td><input class="input-field" id="org-button" type="button" value="Выбрать"></td>
+					</tr>
+					<tr id="search-block__division">
+						<td><label for="division">Подразделение:</label></td>
+						<td><input class="input-field" id="division-button" type="button" value="Выбрать"></td>
+					</tr>
+					<tr>
+						<td><button id="search">Найти</button></td>
+						<td></td>
+					</tr>
+				</table>
+			</div>
+			<!-- ORG -->
+			<div id="org-block" class="org-block">
+				<div id="find-org-block">
+				</div>
+			</div>
+			<!-- DIVISION -->
+			<div id="division-block" class="division-block">	
+				<div id="find-division-block">
+				</div>		
+			</div>
+			<!-- RESULT -->
+			<div id="result" class="result">
+				<table id="filter-table">
+				    <tr>
+				        <th class="collaborator-id">id</th>
+				        <th>ФИО</th>
+				        <th>Должность</th>
+				        <th>Организация</th>
+				        <th>Подразделение</th>
+				    </tr>
+				</table>
+			</div>
+			<!-- MODAL -->
+			<div id="collaborator-info" class="collaborator-info">
+				<table class="collaborator-info__table">
+					<tr>
+						<td id="collaborator-info--id"></td>
+					</tr>
+					<tr>
+						<td>Фамилия:</td>
+						<td id="collaborator-info--lastname"></td>
+						<td><button id="edit-collaborator-info--lastname">Редактировать</button></td>
+					</tr>
+					<tr>
+						<td>Имя:</td>
+						<td id="collaborator-info--firstname"></td>
+						<td><button id="edit-collaborator-info--firstname">Редактировать</button></td>
+					</tr>
+					<tr>
+						<td>Отчество:</td>
+						<td id="collaborator-info--middlename"></td>
+						<td><button id="edit-collaborator-info--middlename">Редактировать</button></td>
+					</tr>
+					<tr>
+						<td>Должность:</td>
+						<td id="collaborator-info--position"></td>
+						<td><button id="edit-collaborator-info--position">Редактировать</button></td>
+					</tr>
+					<tr>
+						<td>Организация:</td>
+						<td id="collaborator-info--org"></td>
+						<td><button id="edit-collaborator-info--org">Редактировать</button></td>
+					</tr>
+					<tr>
+						<td>Подразделение:</td>
+						<td id="collaborator-info--division"></td>
+						<td><button id="edit-collaborator-info--division">Редактировать</button></td>
+					</tr>
+					<tr>
+						<td><button id="collaborator-save">Сохранить</button></td>
+						<td></td>
+					</tr>
+				</table>
+			</div>
+			<!-- MODAL select ORG -->
+			<div id="collaborator-update-org" class="collaborator-update-org">
+				<div id="select-collaborator-update-org">
+				</div>
+			</div>
+			<!-- MODAL select DIVISION -->
+			<div id="collaborator-update-division" class="collaborator-update-division">
+				<div id="select-collaborator-update-division">
+				</div>
+			</div>
+			<div id="block" class="block"></div>
+			<script>
+				$( document ).ready(function() {
 
-						soapRequestBody  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-						soapRequestBody += "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">";
-						soapRequestBody += "<soap:Body>";
-						soapRequestBody += "<" + actionObject.name + " xmlns=\"http://www.websoft.ru/\">";
-						soapRequestBody += "<format>" + soapFormat + "</format>";
-						if (actionObject.options != undefined) {
-							for (var i = 0; i < actionObject.options.length; i++) {
-								soapRequestBody += "<" + actionObject.options[i].name + ">" + actionObject.options[i].value + "</" + actionObject.options[i].name + ">";
-							}
-						}
-						soapRequestBody += "</" + actionObject.name + ">";
-						soapRequestBody += "</soap:Body>";
-						soapRequestBody += "</soap:Envelope>";
+					// Поиск результатов
+					var search = function() {
+						$('.table-data').remove()
+		    	
+				    	// Введенные значения
+			    		var fullname = $('#fullname').val()
+			    		var position = $('#position').val()
+			    		var orgs = []
+			    		var org = $('.checked-org')
+			    		for (var i = 0; i < org.length; i++) {
+				    		orgs.push(org[i].textContent.slice(0,-1))	    			
+			    		}
+			    		var divisions = []
+			    		var division = $('.checked-division')
+			    		for (var i = 0; i < division.length; i++) {
+				    		divisions.push(division[i].textContent.slice(0,-1))	    			
+			    		}
 
+			    		// console.log(fullname, position, orgs.toString(), divisions.toString())
+				    	
+				    	// Обращение к выборке
 						$.ajax({
 							type: "POST",
-							url: soapServerUrl,
-							contentType: "text/xml",
-							dataType: "xml",
-							data: soapRequestBody,
-							success: processSuccess,
-							error: processError
+							url: "/pp/Ext/extjs_json_collection_data.html",
+							dataType: "json",
+							data: {
+								collection_code: "rc_task_finally",
+								// parameters: ''
+								parameters: "fullname=" + fullname + ";position=" + position +
+											";org=" + orgs.toString() + ";division=" + divisions.toString()
+							},
+							success: function (data, textStatus, jqXHR) {
+
+								// Прорисовка таблицы =====================
+								for (elem in data.results) {
+								    var tr = $('<tr></tr>')
+								    tr.addClass('table-data')
+
+								    for(var i = 0; i < 5; i++) {
+								    	var td = $('<td></td>')
+
+								    	if (i === 0) {
+								    		td.addClass('collaborator-id')
+								    		td.attr('id', data.results[elem].id )
+								    		td.text(data.results[elem].id)
+
+								    	} else if (i === 1) {
+								    		td.addClass('collaborator')
+								    		td.text(data.results[elem].fullname)
+								    	} else if (i === 2) {
+								    		td.text(data.results[elem].position)
+								    	} else if (i === 3) {
+								    		td.text(data.results[elem].org)
+								    	} else if (i === 4) {
+								    		td.text(data.results[elem].division)
+								    	}		 			
+								    	
+								    	tr.append(td)
+								    }		
+
+						    		$('#filter-table').append(tr)					
+								}
+								// Прорисовка таблицы =====================
+							}
 						});
 
-						function processSuccess (data, status, req) {
-							if (status == "success") {
-								var returnObject = {
-									error: data.getElementsByTagName('error')[0].firstChild,
-									type: data.getElementsByTagName('type')[0].firstChild,
-									messageText: data.getElementsByTagName('messageText')[0].firstChild,
-									result: data.getElementsByTagName('result')[0].firstChild
-								};
-								try{
-									returnObject.error = returnObject.error.nodeValue;
-								}
-								catch(_ex){}
-								try{
-									returnObject.type = returnObject.type.nodeValue;
-								}
-								catch(_ex){}
-								try{
-									returnObject.messageText = returnObject.messageText.nodeValue;
-								}
-								catch(_ex){}
-								try{
-									returnObject.result = returnObject.result.nodeValue;
-								}
-								catch(_ex){}
+						// Обработка ajax
+						setTimeout(collaborator, 200);
+					}
 
-								if (actionObject.callback_f != undefined) {
-									actionObject.callback_f(returnObject);
+
+
+					// Для удаленного действия
+					remoteAction = function (actionObject) {
+						try {
+							if (remoteAction != undefined) {
+								var returnObject = {};
+								var soapRequestBody;
+								var soapServerUrl = actionObject.url != undefined ? actionObject.url : '/remote_actions_wsdl.xml';
+								var soapFormat = actionObject.format != undefined ? actionObject.format : 'json';
+
+								soapRequestBody  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+								soapRequestBody += "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">";
+								soapRequestBody += "<soap:Body>";
+								soapRequestBody += "<" + actionObject.name + " xmlns=\"http://www.websoft.ru/\">";
+								soapRequestBody += "<format>" + soapFormat + "</format>";
+								if (actionObject.options != undefined) {
+									for (var i = 0; i < actionObject.options.length; i++) {
+										soapRequestBody += "<" + actionObject.options[i].name + ">" + actionObject.options[i].value + "</" + actionObject.options[i].name + ">";
+									}
+								}
+								soapRequestBody += "</" + actionObject.name + ">";
+								soapRequestBody += "</soap:Body>";
+								soapRequestBody += "</soap:Envelope>";
+
+								$.ajax({
+									type: "POST",
+									url: soapServerUrl,
+									contentType: "text/xml",
+									dataType: "xml",
+									data: soapRequestBody,
+									success: processSuccess,
+									error: processError
+								});
+
+								function processSuccess (data, status, req) {
+									if (status == "success") {
+										var returnObject = {
+											error: data.getElementsByTagName('error')[0].firstChild,
+											type: data.getElementsByTagName('type')[0].firstChild,
+											messageText: data.getElementsByTagName('messageText')[0].firstChild,
+											result: data.getElementsByTagName('result')[0].firstChild
+										};
+										try{
+											returnObject.error = returnObject.error.nodeValue;
+										}
+										catch(_ex){}
+										try{
+											returnObject.type = returnObject.type.nodeValue;
+										}
+										catch(_ex){}
+										try{
+											returnObject.messageText = returnObject.messageText.nodeValue;
+										}
+										catch(_ex){}
+										try{
+											returnObject.result = returnObject.result.nodeValue;
+										}
+										catch(_ex){}
+
+										if (actionObject.callback_f != undefined) {
+											actionObject.callback_f(returnObject);
+										}
+
+										return returnObject;
+									}
+									else {
+										throw status;
+									}
 								}
 
-								return returnObject;
+								function processError(data, status, req) {
+									throw req.responseText;
+								}
 							}
-							else {
-								throw status;
+							else
+							{
+								throw '00'
+							}
+						}
+						catch(_exeption) {
+							returnObject = {error: 1, messageText: _exeption};
+							if (typeof(actionObject.callback_f) != 'undefined') {
+								actionObject.callback_f(returnObject);
+							}
+							return returnObject ;
+						}
+					};
+
+					function collaborator() {
+						// Работа с элементами результатов ============================
+							$('.collaborator').click(function() {
+								$('#block').css({'z-index': 2});
+
+									var select_item = $(this).context.parentNode.children;
+									// Получаем id выбранного элемента
+									var fullname = select_item[1].textContent.split(' ');
+									var user = {
+										id: select_item[0].textContent,
+										lastname: fullname[0],
+										firstname: fullname[1],
+										middlename: fullname[2],
+										position: select_item[2].textContent,
+										org: select_item[3].textContent,
+										division: select_item[4].textContent,
+									}
+									// console.log(user)
+
+									$('#collaborator-info').show()
+
+									$('#collaborator-info--id').text(user.id)
+									$('#collaborator-info--lastname').text(user.lastname)
+									$('#collaborator-info--firstname').text(user.firstname)
+									$('#collaborator-info--middlename').text(user.middlename)
+									$('#collaborator-info--position').text(user.position)
+									$('#collaborator-info--org').text(user.org)
+									$('#collaborator-info--division').text(user.division)
+							});					
+
+								
+
+							
+			    			$('#result').show()
+					}
+
+					// EDIT
+					$('#edit-collaborator-info--lastname').click(function() {						
+						if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
+							// console.log('ok')
+
+							// Изменяемое поле
+							var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+							// Получить текст изменяемого поля
+							// console.log(edit_items.textContent)
+							var input = document.createElement('input');
+							input.value = edit_items.textContent;
+							
+							edit_items.textContent = ''						
+							
+							edit_items.append(input)
+
+
+							$(this).context.parentNode.children[0].textContent = 'ок';
+						} else {
+							$(this).context.parentNode.children[0].textContent = 'Редактировать';
+
+							// Изменяемое поле
+							var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+							// Считываем значение из input 
+							// console.log($(this).context.parentNode.parentNode.children[1].children[0].value)
+							edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
+						}
+					});
+					$('#edit-collaborator-info--firstname').click(function() {			
+						if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
+
+							// Изменяемое поле
+							var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+							// Получить текст изменяемого поля
+							// console.log(edit_items.textContent)
+							var input = document.createElement('input');
+							input.value = edit_items.textContent;
+							
+							edit_items.textContent = ''						
+							
+							edit_items.append(input)
+
+
+							$(this).context.parentNode.children[0].textContent = 'ок';
+						} else {
+							$(this).context.parentNode.children[0].textContent = 'Редактировать';
+
+							// Изменяемое поле
+							var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+							// Считываем значение из input 
+							// console.log($(this).context.parentNode.parentNode.children[1].children[0].value)
+							edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
+						}
+					});
+					$('#edit-collaborator-info--middlename').click(function() {				
+						if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
+
+							// Изменяемое поле
+							var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+							// Получить текст изменяемого поля
+							// console.log(edit_items.textContent)
+							var input = document.createElement('input');
+							input.value = edit_items.textContent;
+							
+							edit_items.textContent = ''						
+							
+							edit_items.append(input)
+
+
+							$(this).context.parentNode.children[0].textContent = 'ок';
+						} else {
+							$(this).context.parentNode.children[0].textContent = 'Редактировать';
+
+							// Изменяемое поле
+							var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+							// Считываем значение из input 
+							// console.log($(this).context.parentNode.parentNode.children[1].children[0].value)
+							edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
+						}
+					});
+					$('#edit-collaborator-info--position').click(function() {
+
+
+						if ($(this).context.parentNode.parentNode.children[1].textContent === '') {
+							// Если у сотрудника не указана должность, то поле доступно для редактирования только после заполнения фильтров организации и подразделения. 
+	
+							if ($('#collaborator-info--org')[0].textContent === '' || $('#collaborator-info--division')[0].textContent === '') {
+								alert('Выберите организацию и подразделение')
+							} else {
+								if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
+								// Изменяемое поле
+								var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+								// Получить текст изменяемого поля
+								var input = document.createElement('input');
+								input.value = edit_items.textContent;							
+								edit_items.textContent = ''						
+								edit_items.append(input)
+
+								$(this).context.parentNode.children[0].textContent = 'ок';
+							} else {
+								$(this).context.parentNode.children[0].textContent = 'Редактировать';
+								// Изменяемое поле
+								var edit_items = $(this).context.parentNode.parentNode.children[1]
+								// Считываем значение из input 
+								edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
+							}
+							}
+						} else {
+							if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
+								// Изменяемое поле
+								var edit_items = $(this).context.parentNode.parentNode.children[1]
+
+								// Получить текст изменяемого поля
+								var input = document.createElement('input');
+								input.value = edit_items.textContent;							
+								edit_items.textContent = ''						
+								edit_items.append(input)
+
+								$(this).context.parentNode.children[0].textContent = 'ок';
+							} else {
+								$(this).context.parentNode.children[0].textContent = 'Редактировать';
+								// Изменяемое поле
+								var edit_items = $(this).context.parentNode.parentNode.children[1]
+								// Считываем значение из input 
+								edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
 							}
 						}
 
-						function processError(data, status, req) {
-							throw req.responseText;
+					});
+					// РЕДАКТОР ОРГАНИЗАЦИИ
+					$('#edit-collaborator-info--org').click(function() {
+						$('#block').css({'z-index': 6});
+
+						$('#collaborator-update-org').show()
+
+						// Запускаем тот же выбор что и в поиске
+						$.ajax({
+							type: "POST",
+							url: "/pp/Ext/extjs_json_collection_data.html",
+							dataType: "json",
+							data: {
+								collection_code: "rc_task_finally_org",
+								parameters: ''
+							},
+							success: function (data, textStatus, jqXHR) {
+
+								// Обнуляем #select-collaborator-update-org
+								$('#select-collaborator-update-org').text('')
+
+								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+								var button = $('<button id="update-org-search">Выбрать</button>')
+								button.click(function() {
+									$('#block').css({'z-index': 2});
+									// Заменяем текущую организацию
+									// Очищаем подразделение
+				    				var org_search_DOM = $(this).context.parentNode.children
+				    				for (var i = 0, max = org_search_DOM.length; i < max; i++) {
+				    					if (org_search_DOM[i].checked) {
+				    						$('#collaborator-info--org').text(org_search_DOM[i].value)
+				    					}
+				    				}
+									$('#collaborator-info--division').text('')
+									$('#collaborator-update-org').hide()
+								})
+
+								for (elem in data.results) {
+									var id = data.results[elem].id
+									var name = data.results[elem].name
+									var input = $('<input type="radio" name="org" value="' + name + '" id="select' + id + '" checked />')
+									var label = $('<label for="select' + id + '">"' + name + '"</label><br>')
+
+						    		$('#select-collaborator-update-org').append(input)					
+						    		$('#select-collaborator-update-org').append(label)					
+								}
+
+								// После добавления всех radio
+					    		$('#select-collaborator-update-org').append(button)	
+
+							}
+						});
+					});
+					// РЕДАКТОР ПОДРАЗДЕЛЕНИЙ
+					$('#edit-collaborator-info--division').click(function() {
+						$('#block').css({'z-index': 6});
+
+						$('#collaborator-update-division').show()
+
+						var select_org = $('#collaborator-info--org').text()
+						// console.log(select_org)
+
+						// Запускаем тот же выбор что и в поиске
+						$.ajax({
+							type: "POST",
+							url: "/pp/Ext/extjs_json_collection_data.html",
+							dataType: "json",
+							data: {
+								collection_code: "rc_task_finally_division",
+								parameters: 'checked=' + select_org
+							},
+							success: function (data, textStatus, jqXHR) {
+
+								// Обнуляем #select-collaborator-update-division
+								$('#select-collaborator-update-division').text('')
+
+								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+								var button = $('<button id="update-division-search">Выбрать</button>')
+								button.click(function() {
+									$('#block').css({'z-index': 2});
+									// Заменяем текущую организацию
+									// Очищаем подразделение
+				    				var division_search_DOM = $(this).context.parentNode.children
+				    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
+				    					if (division_search_DOM[i].checked) {
+				    						$('#collaborator-info--division').text(division_search_DOM[i].value)
+				    					}
+				    				}
+									// $('#collaborator-info--division').text('')
+									$('#collaborator-update-division').hide()
+								})
+
+								for (elem in data.results) {
+									var id = data.results[elem].id
+									var name = data.results[elem].name
+									var input = $('<input type="radio" name="division" value="' + name + '" id="select' + id + '" checked />')
+									var label = $('<label for="select' + id + '">"' + name + '"</label><br>')
+
+						    		$('#select-collaborator-update-division').append(input)					
+						    		$('#select-collaborator-update-division').append(label)					
+								}
+
+								// После добавления всех radio
+					    		$('#select-collaborator-update-division').append(button)	
+							}
+						});
+					});
+
+					// Сохранение измененных данных
+					$('#collaborator-save').click(function() {
+
+						// Проверка все ли изменения подтверждены
+						if ($('#edit-collaborator-info--lastname')[0].textContent === 'ок' || $('#edit-collaborator-info--firstname')[0].textContent === 'ок'|| $('#edit-collaborator-info--middlename')[0].textContent === 'ок' || $('#edit-collaborator-info--position')[0].textContent === 'ок') {
+							alert('Подтвердите все изменения')
+						} else {
+							// ОБНОВЛЯЕМ ДАННЫЕ НА СЕРВЕРЕ 
+							$('#block').css({'z-index': 0});
+							$('#collaborator-info').hide()
+
+							var info_arr = $(this).context.parentNode.parentNode.parentNode.children
+							// [id, lastname, firstname, middlename, position, org, division, ...]
+
+							var id = info_arr[0].textContent.replace( /\s/g, "")
+							var lastname = info_arr[1].children[1].textContent
+							var firstname = info_arr[2].children[1].textContent
+							var middlename = info_arr[3].children[1].textContent
+							var position = info_arr[4].children[1].textContent
+							var org = info_arr[5].children[1].textContent
+							var division = info_arr[6].children[1].textContent
+
+							var fullname = lastname + ' ' + firstname + ' ' + middlename 
+
+							//работа с удаленным действием 
+							regAction = {
+								name : "re_task_finally_1", //код удаленного действия
+								options: [{ name: "id", value: id },
+										 { name: "fullname", value: fullname },
+										 { name: "position", value: position},
+										 { name: "org", value: org},
+										 { name: "division", value: division}
+										 ],
+
+								callback_f : function(_doc){
+									// waitWindow.hide();
+									if (_doc.error == 0)
+									{
+										// Обновляем таблицу
+										return search();
+									}
+									else
+									{
+										alert(0)
+									}
+								}
+							} 
+							// пример коллбэка на ответ, его может не быть, 
+							// _doc - возвращаемый объект, содержит поля error, type, messageText, result
+							remoteAction(regAction);							
 						}
-					}
-					else
-					{
-						throw '00'
-					}
-				}
-				catch(_exeption) {
-					returnObject = {error: 1, messageText: _exeption};
-					if (typeof(actionObject.callback_f) != 'undefined') {
-						actionObject.callback_f(returnObject);
-					}
-					return returnObject ;
-				}
-			};
-			// Скрываем блоки выбора ==============
-			(function () {
-				$('#org-block').hide()
-				$('#division-block').hide()
-				$('#result').hide()
-				$('#collaborator-info').hide()
-				$('#collaborator-update-org').hide()
-				$('#collaborator-update-division').hide()				
-			})();
-			// ====================================
-       		// ВЫБОРКИ ============================
-       		// Организации
-		    $('#org-button').click(function() {
-				$.ajax({
-					type: "POST",
-					url: "/pp/Ext/extjs_json_collection_data.html",
-					dataType: "json",
-					data: {
-						collection_code: "rc_task_finally_org",
-						parameters: ''
-						// parameters: "fullname=" + fullname.dom.value 
-						// 			+ ";gender=" + gender.dom.value 
-					},
-					success: function (data, textStatus, jqXHR) {
+					});
 
-						// Обнуляем #find-org-block
-						$('#find-org-block').text('')
+					// Скрываем блоки выбора 
+					(function () {
+						$('#org-block').hide()
+						$('#division-block').hide()
+						$('#result').hide()
+						$('#collaborator-info').hide()
+						$('#collaborator-update-org').hide()
+						$('#collaborator-update-division').hide()				
+					})();
 
-						// Проверяем какие элементы уже выбраны .checked-org
+		       		// ВЫБОРКИ ============================
+		       		// Организации
+				    $('#org-button').click(function() {
+				    	$('#block').css({'z-index': 2});
+						$.ajax({
+							type: "POST",
+							url: "/pp/Ext/extjs_json_collection_data.html",
+							dataType: "json",
+							data: {
+								collection_code: "rc_task_finally_org",
+								parameters: ''
+								// parameters: "fullname=" + fullname.dom.value 
+								// 			+ ";gender=" + gender.dom.value 
+							},
+							success: function (data, textStatus, jqXHR) {
+
+								// Обнуляем #find-org-block
+								$('#find-org-block').text('')
+
+								// Проверяем какие элементы уже выбраны .checked-org
+								var already_checked = []
+
+								if ($('.checked-org').length) {
+									for (var i = 0, max = $('.checked-org').length; i < max; i++) {
+										already_checked.push($('.checked-org')[i].children[0].textContent)
+									}
+								} 
+
+								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+								var button = $('<button id="org-search">Выбрать</button>')
+
+								for (elem in data.results) {
+									var id = data.results[elem].id
+									var name = data.results[elem].name
+									var input = $('<input type="checkbox" name="org" value="' + name + '" id="' + id + '" />')
+									if(already_checked.indexOf(name) != -1) {
+										input.prop('checked', true);								
+									}
+
+									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
+
+						    		$('#find-org-block').append(input)					
+						    		$('#find-org-block').append(label)					
+								}
+
+								// После добавления всех checkbox
+					    		$('#find-org-block').append(button)		
+					    						
+
+					    		$('#org-search').click(function() {	
+					    				$('#block').css({'z-index': 0});
+
+					    				// Очищаем выбранные подразделения
+						    			$('.checked-division').remove()
+
+					    				// Выбранные элементы
+					    				var checked = []
+
+					    				// Получаем DOM структуру #org-search
+					    				var org_search_DOM = $(this).context.parentNode.children
+					    				for (var i = 0, max = org_search_DOM.length; i < max; i++) {
+					    					if (org_search_DOM[i].checked) {
+					    						checked.push({
+					    							id: org_search_DOM[i].id,
+					    							name: org_search_DOM[i].value
+					    						})
+					    					}
+					    				}
+
+					    				// Массив из объектов выбранных элементов 
+					    				// {id: "6537284716620812580", name: "Yandex"}
+
+					    				// Если есть checked - прорисовываем
+					    				if (checked.length > 0) {
+					    					// Вставляем выбранные элементы после #search-block__org
+
+					    					// Очищаем от старых значений
+											$('.checked-org').remove()
+					    					
+					    					for (elem in checked) {
+					    						var name = checked[elem].name
+									    		var tr = $('<tr></tr>')
+									    		var td = $('<td></td>')
+									    		var button = $('<button class="remove_checked_org">X</button>')
+									    		button.click(function() {
+
+					    							// Очищаем выбранные подразделения
+						    						$('.checked-division').remove()
+									    			
+									    			// Удаляем блок
+									    			$(this).context.parentNode.parentNode.remove()
+									    		})
+									    		td.append(button)
+									    		tr.addClass('checked-org')
+									    		tr.append('<td>' + name + '</td>')
+									    		tr.append(td)
+				    							$('#search-block__org').after(tr)			    						
+					    					}
+					    				}
+
+					    				$('#org-block').hide()
+					    		});
+								// =====================================================
+							}
+						});
+
+						setTimeout(function() {
+			    			$('#org-block').show()
+						}, 200);	
+				    });
+		       		// Подразделения
+		    		$('#division-button').click(function() {
+		    			 $('#block').css({'z-index': 2});
+
+		    			// РАЗЛИЧИЯ ===============================================
+		    			// Посмотреть какие организации выбраны
+		    			// передать их в параметры
 						var already_checked = []
 
 						if ($('.checked-org').length) {
@@ -293,642 +810,111 @@
 								already_checked.push($('.checked-org')[i].children[0].textContent)
 							}
 						} 
-
-						// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-						var button = $('<button id="org-search">Выбрать</button>')
-
-						for (elem in data.results) {
-							var id = data.results[elem].id
-							var name = data.results[elem].name
-							var input = $('<input type="checkbox" name="org" value="' + name + '" id="' + id + '" />')
-							if(already_checked.indexOf(name) != -1) {
-								input.prop('checked', true);								
-							}
-
-							var label = $('<label for="' + id + '">"' + name + '"</label><br>')
-
-				    		$('#find-org-block').append(input)					
-				    		$('#find-org-block').append(label)					
-						}
-
-						// После добавления всех checkbox
-			    		$('#find-org-block').append(button)		
-			    						
-
-			    		$('#org-search').click(function() {	
-
-			    				// Очищаем выбранные подразделения
-				    			$('.checked-division').remove()
-
-			    				// Выбранные элементы
-			    				var checked = []
-
-			    				// Получаем DOM структуру #org-search
-			    				var org_search_DOM = $(this).context.parentNode.children
-			    				for (var i = 0, max = org_search_DOM.length; i < max; i++) {
-			    					if (org_search_DOM[i].checked) {
-			    						checked.push({
-			    							id: org_search_DOM[i].id,
-			    							name: org_search_DOM[i].value
-			    						})
-			    					}
-			    				}
-
-			    				// Массив из объектов выбранных элементов 
-			    				// {id: "6537284716620812580", name: "Yandex"}
-
-			    				// Если есть checked - прорисовываем
-			    				if (checked.length > 0) {
-			    					// Вставляем выбранные элементы после #search-block__org
-
-			    					// Очищаем от старых значений
-									$('.checked-org').remove()
-			    					
-			    					for (elem in checked) {
-			    						var name = checked[elem].name
-							    		var tr = $('<tr></tr>')
-							    		var td = $('<td></td>')
-							    		var button = $('<button class="remove_checked_org">X</button>')
-							    		button.click(function() {
-
-			    							// Очищаем выбранные подразделения
-				    						$('.checked-division').remove()
-							    			
-							    			// Удаляем блок
-							    			$(this).context.parentNode.parentNode.remove()
-							    		})
-							    		td.append(button)
-							    		tr.addClass('checked-org')
-							    		tr.append('<td>' + name + '</td>')
-							    		tr.append(td)
-		    							$('#search-block__org').after(tr)			    						
-			    					}
-			    				}
-
-			    				$('#org-block').hide()
-			    		});
-						// =====================================================
-					}
-				});
-
-				setTimeout(function() {
-	    			$('#org-block').show()
-				}, 200);	
-		    });
-       		// Подразделения
-    		$('#division-button').click(function() {
-
-    			// РАЗЛИЧИЯ ===============================================
-    			// Посмотреть какие организации выбраны
-    			// передать их в параметры
-				var already_checked = []
-
-				if ($('.checked-org').length) {
-					for (var i = 0, max = $('.checked-org').length; i < max; i++) {
-						already_checked.push($('.checked-org')[i].children[0].textContent)
-					}
-				} 
-    			// ========================================================
-
-				$.ajax({
-					type: "POST",
-					url: "/pp/Ext/extjs_json_collection_data.html",
-					dataType: "json",
-					data: {
-						collection_code: "rc_task_finally_division",
-
-						// Добавляем переменную checked в выборке
-						parameters: 'checked=' + already_checked.toString()
-					},
-					success: function (data, textStatus, jqXHR) {
-
-						// Обнуляем #find-division-block
-						$('#find-division-block').text('')
-
-						// Проверяем какие элементы уже выбраны .checked-division
-						var already_checked = []
-
-						if ($('.checked-division').length) {
-							for (var i = 0, max = $('.checked-division').length; i < max; i++) {
-								already_checked.push($('.checked-division')[i].children[0].textContent)
-							}
-						} 
-
-						// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-						var button = $('<button id="division-search">Выбрать</button>')
-
-						for (elem in data.results) {
-							var id = data.results[elem].id
-							var name = data.results[elem].name
-							var input = $('<input type="checkbox" name="division" value="' + name + '" id="' + id + '" />')
-							if(already_checked.indexOf(name) != -1) {
-								input.prop('checked', true);								
-							}
-
-							var label = $('<label for="' + id + '">"' + name + '"</label><br>')
-
-				    		$('#find-division-block').append(input)					
-				    		$('#find-division-block').append(label)					
-						}
-
-						// После добавления всех checkbox
-			    		$('#find-division-block').append(button)		
-			    						
-
-			    		$('#division-search').click(function() {	    				
-			    				// Выбранные элементы
-			    				var checked = []
-			    				// Получаем DOM структуру #division-search
-			    				var division_search_DOM = $(this).context.parentNode.children
-			    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
-			    					if (division_search_DOM[i].checked) {
-			    						checked.push({
-			    							id: division_search_DOM[i].id,
-			    							name: division_search_DOM[i].value
-			    						})
-			    					}
-			    				}
-			    				// Массив из объектов выбранных элементов 
-			    				// {id: "6537284716620812580", name: "Yandex"}
-
-			    				// Если есть checked - прорисовываем
-			    				if (checked.length > 0) {
-			    					// Вставляем выбранные элементы после #search-block__division
-
-			    					// Очищаем от старых значений
-									$('.checked-division').remove()
-			    					
-			    					for (elem in checked) {
-			    						var name = checked[elem].name
-							    		var tr = $('<tr></tr>')
-							    		var td = $('<td></td>')
-							    		var button = $('<button>X</button>')
-							    		button.click(function() {
-							    			// Удаляем блок
-							    			$(this).context.parentNode.parentNode.remove()
-							    		})
-							    		td.append(button)
-							    		tr.addClass('checked-division')
-							    		tr.append('<td>' + name + '</td>')
-							    		tr.append(td)
-		    							$('#search-block__division').after(tr)			    						
-			    					}
-			    				}
-
-			    				$('#division-block').hide()
-			    		});
-						// =====================================================
-					}
-				});
-
-				setTimeout(function() {
-	    			$('#division-block').show()
-				}, 200);	
-		    });				
-		    // ====================================	
-		    // ПОИСК
-		    $('#search').click(function() {
-	    		$('.table-data').remove()
-		    	
-		    	// Введенные значения
-	    		var fullname = $('#fullname').val()
-	    		var position = $('#position').val()
-	    		var orgs = []
-	    		var org = $('.checked-org')
-	    		for (var i = 0; i < org.length; i++) {
-		    		orgs.push(org[i].textContent.slice(0,-1))	    			
-	    		}
-	    		var divisions = []
-	    		var division = $('.checked-division')
-	    		for (var i = 0; i < division.length; i++) {
-		    		divisions.push(division[i].textContent.slice(0,-1))	    			
-	    		}
-
-	    		// console.log(fullname, position, orgs.toString(), divisions.toString())
-		    	// Обращение к выборке
-				$.ajax({
-					type: "POST",
-					url: "/pp/Ext/extjs_json_collection_data.html",
-					dataType: "json",
-					data: {
-						collection_code: "rc_task_finally",
-						// parameters: ''
-						parameters: "fullname=" + fullname + ";position=" + position +
-									";org=" + orgs.toString() + ";division=" + divisions.toString()
-					},
-					success: function (data, textStatus, jqXHR) {
-
-						// Прорисовка таблицы =====================
-						for (elem in data.results) {
-						    var tr = $('<tr></tr>')
-						    tr.addClass('table-data')
-
-						    for(var i = 0; i < 5; i++) {
-						    	var td = $('<td></td>')
-
-						    	if (i === 0) {
-						    		td.addClass('collaborator-id')
-						    		td.attr('id', data.results[elem].id )
-						    		td.text(data.results[elem].id)
-
-						    	} else if (i === 1) {
-						    		td.addClass('collaborator')
-						    		td.text(data.results[elem].fullname)
-						    	} else if (i === 2) {
-						    		td.text(data.results[elem].position)
-						    	} else if (i === 3) {
-						    		td.text(data.results[elem].org)
-						    	} else if (i === 4) {
-						    		td.text(data.results[elem].division)
-						    	}		 			
-						    	
-						    	tr.append(td)
-						    }		
-
-				    		$('#filter-table').append(tr)					
-						}
-						// Прорисовка таблицы =====================
-
-					}
-				});
-
-				// Обработка ajax
-				setTimeout(function() {
-
-					// Работа с элементами результатов ============================
-					$('.collaborator').click(function() {
-						// console.log('ok')
-							var select_item = $(this).context.parentNode.children;
-							// Получаем id выбранного элемента
-							var fullname = select_item[1].textContent.split(' ');
-							var user = {
-								id: select_item[0].textContent,
-								lastname: fullname[0],
-								firstname: fullname[1],
-								middlename: fullname[2],
-								position: select_item[2].textContent,
-								org: select_item[3].textContent,
-								division: select_item[4].textContent,
-							}
-
-							// console.log(user)
-
-							$('#collaborator-info').show()
-							$('#collaborator-info--id').text(user.id)
-							$('#collaborator-info--lastname').text(user.lastname)
-							$('#collaborator-info--firstname').text(user.firstname)
-							$('#collaborator-info--middlename').text(user.middlename)
-							$('#collaborator-info--position').text(user.position)
-							$('#collaborator-info--org').text(user.org)
-							$('#collaborator-info--division').text(user.division)
-					});
-
-					$('#collaborator-save').click(function() {
-						// !!! ОБНОВЛЯЕМ ДАННЫЕ НА СЕРВЕРЕ 
-						$('#collaborator-info').hide()
-
-						var info_arr = $(this).context.parentNode.parentNode.parentNode.children
-						// [id, lastname, firstname, middlename, position, org, division, ...]
-
-						var id = info_arr[0].textContent.replace( /\s/g, "")
-						var lastname = info_arr[1].children[1].textContent
-						var firstname = info_arr[2].children[1].textContent
-						var middlename = info_arr[3].children[1].textContent
-						var position = info_arr[4].children[1].textContent
-						var org = info_arr[5].children[1].textContent
-						var division = info_arr[6].children[1].textContent
-
-						var fullname = lastname + ' ' + firstname + ' ' + middlename 
-
-						//работа с удаленным действием 
-						regAction = {
-							name : "re_task_finally_1", //код удаленного действия
-							options: [{ name: "id", value: id },
-									 { name: "fullname", value: fullname },
-									 { name: "position", value: position},
-									 { name: "org", value: org},
-									 { name: "division", value: division}
-									 ],
-
-							callback_f : function(_doc){
-								waitWindow.hide();
-								if (_doc.error == 0)
-								{
-									alert(1)
-								}
-								else
-								{
-									alert(0)
-								}
-							}
-						} 
-						// пример коллбэка на ответ, его может не быть, 
-						// _doc - возвращаемый объект, содержит поля error, type, messageText, result
-
-						remoteAction(regAction);
-					});
-
-						// EDIT COLLABORATOR +++++++++++++++++++++++++++++++++++++++
-						$('#edit-collaborator-info--lastname').click(function() {
-
-							// Изменить текст кнопки
-							// console.log($(this).context.parentNode.children[0].textContent)
-							
-							if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Получить текст изменяемого поля
-								// console.log(edit_items.textContent)
-								var input = document.createElement('input');
-								input.value = edit_items.textContent;
-								
-								edit_items.textContent = ''						
-								
-								edit_items.append(input)
-
-
-								$(this).context.parentNode.children[0].textContent = 'ок';
-							} else {
-								$(this).context.parentNode.children[0].textContent = 'Редактировать';
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Считываем значение из input 
-								// console.log($(this).context.parentNode.parentNode.children[1].children[0].value)
-								edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
-							}
-						});
-						$('#edit-collaborator-info--firstname').click(function() {
-
-							// Изменить текст кнопки
-							// console.log($(this).context.parentNode.children[0].textContent)
-							
-							if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Получить текст изменяемого поля
-								// console.log(edit_items.textContent)
-								var input = document.createElement('input');
-								input.value = edit_items.textContent;
-								
-								edit_items.textContent = ''						
-								
-								edit_items.append(input)
-
-
-								$(this).context.parentNode.children[0].textContent = 'ок';
-							} else {
-								$(this).context.parentNode.children[0].textContent = 'Редактировать';
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Считываем значение из input 
-								// console.log($(this).context.parentNode.parentNode.children[1].children[0].value)
-								edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
-							}
-						});
-						$('#edit-collaborator-info--middlename').click(function() {
-
-							// Изменить текст кнопки
-							// console.log($(this).context.parentNode.children[0].textContent)
-							
-							if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Получить текст изменяемого поля
-								// console.log(edit_items.textContent)
-								var input = document.createElement('input');
-								input.value = edit_items.textContent;
-								
-								edit_items.textContent = ''						
-								
-								edit_items.append(input)
-
-
-								$(this).context.parentNode.children[0].textContent = 'ок';
-							} else {
-								$(this).context.parentNode.children[0].textContent = 'Редактировать';
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Считываем значение из input 
-								// console.log($(this).context.parentNode.parentNode.children[1].children[0].value)
-								edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
-							}
-						});
-						$('#edit-collaborator-info--position').click(function() {
-
-							// Изменить текст кнопки
-							// console.log($(this).context.parentNode.children[0].textContent)
-							
-							if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Получить текст изменяемого поля
-								// console.log(edit_items.textContent)
-								var input = document.createElement('input');
-								input.value = edit_items.textContent;
-								
-								edit_items.textContent = ''						
-								
-								edit_items.append(input)
-
-
-								$(this).context.parentNode.children[0].textContent = 'ок';
-							} else {
-								$(this).context.parentNode.children[0].textContent = 'Редактировать';
-
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-
-								// Считываем значение из input 
-								// console.log($(this).context.parentNode.parentNode.children[1].children[0].value)
-								edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
-							}
-						});
-
-						// РЕДАКТОР ОРГАНИЗАЦИИ
-						$('#edit-collaborator-info--org').click(function() {
-
-							$('#collaborator-update-org').show()
-
-							// Запускаем тот же выбор что и в поиске
-							$.ajax({
-								type: "POST",
-								url: "/pp/Ext/extjs_json_collection_data.html",
-								dataType: "json",
-								data: {
-									collection_code: "rc_task_finally_org",
-									parameters: ''
-								},
-								success: function (data, textStatus, jqXHR) {
-
-									// Обнуляем #select-collaborator-update-org
-									$('#select-collaborator-update-org').text('')
-
-									// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-									var button = $('<button id="update-org-search">Выбрать</button>')
-									button.click(function() {
-										// Заменяем текущую организацию
-										// Очищаем подразделение
-					    				var org_search_DOM = $(this).context.parentNode.children
-					    				for (var i = 0, max = org_search_DOM.length; i < max; i++) {
-					    					if (org_search_DOM[i].checked) {
-					    						$('#collaborator-info--org').text(org_search_DOM[i].value)
-					    					}
-					    				}
-										$('#collaborator-info--division').text('')
-										$('#collaborator-update-org').hide()
-									})
-
-									for (elem in data.results) {
-										var id = data.results[elem].id
-										var name = data.results[elem].name
-										var input = $('<input type="radio" name="org" value="' + name + '" id="select' + id + '" checked />')
-										var label = $('<label for="select' + id + '">"' + name + '"</label><br>')
-
-							    		$('#select-collaborator-update-org').append(input)					
-							    		$('#select-collaborator-update-org').append(label)					
+		    			// ========================================================
+
+						$.ajax({
+							type: "POST",
+							url: "/pp/Ext/extjs_json_collection_data.html",
+							dataType: "json",
+							data: {
+								collection_code: "rc_task_finally_division",
+
+								// Добавляем переменную checked в выборке
+								parameters: 'checked=' + already_checked.toString()
+							},
+							success: function (data, textStatus, jqXHR) {
+
+								// Обнуляем #find-division-block
+								$('#find-division-block').text('')
+
+								// Проверяем какие элементы уже выбраны .checked-division
+								var already_checked = []
+
+								if ($('.checked-division').length) {
+									for (var i = 0, max = $('.checked-division').length; i < max; i++) {
+										already_checked.push($('.checked-division')[i].children[0].textContent)
+									}
+								} 
+
+								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+								var button = $('<button id="division-search">Выбрать</button>')
+
+								for (elem in data.results) {
+									var id = data.results[elem].id
+									var name = data.results[elem].name
+									var input = $('<input type="checkbox" name="division" value="' + name + '" id="' + id + '" />')
+									if(already_checked.indexOf(name) != -1) {
+										input.prop('checked', true);								
 									}
 
-									// После добавления всех radio
-						    		$('#select-collaborator-update-org').append(button)		
-						    						
+									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
 
-						    		// $('#org-search').click(function() {	
-
-						    		// 		// Очищаем выбранные подразделения
-							    	// 		$('.checked-division').remove()
-
-						    		// 		// Выбранные элементы
-						    		// 		var checked = []
-
-						    		// 		// Получаем DOM структуру #org-search
-						    		// 		var org_search_DOM = $(this).context.parentNode.children
-						    		// 		for (var i = 0, max = org_search_DOM.length; i < max; i++) {
-						    		// 			if (org_search_DOM[i].checked) {
-						    		// 				checked.push({
-						    		// 					id: org_search_DOM[i].id,
-						    		// 					name: org_search_DOM[i].value
-						    		// 				})
-						    		// 			}
-						    		// 		}
-
-						    		// 		// Если есть checked - прорисовываем
-						    		// 		if (checked.length > 0) {
-						    		// 			// Вставляем выбранные элементы после #search-block__org
-
-						    		// 			// Очищаем от старых значений
-												// $('.checked-org').remove()
-						    					
-						    		// 			for (elem in checked) {
-						    		// 				var name = checked[elem].name
-										  //   		var tr = $('<tr></tr>')
-										  //   		var td = $('<td></td>')
-										  //   		var button = $('<button class="remove_checked_org">X</button>')
-										  //   		button.click(function() {
-
-						    		// 					// Очищаем выбранные подразделения
-							    	// 					$('.checked-division').remove()
-										    			
-										  //   			// Удаляем блок
-										  //   			$(this).context.parentNode.parentNode.remove()
-										  //   		})
-										  //   		td.append(button)
-										  //   		tr.addClass('checked-org')
-										  //   		tr.append('<td>' + name + '</td>')
-										  //   		tr.append(td)
-					    			// 				$('#search-block__org').after(tr)			    						
-						    		// 			}
-						    		// 		}
-
-						    		// 		$('#org-block').hide()
-						    		// });
-									// =====================================================
+						    		$('#find-division-block').append(input)					
+						    		$('#find-division-block').append(label)					
 								}
-							});
 
-							// setTimeout(function() {
-				   //  			$('#org-block').show()
-							// }, 200);	
-							// =====================================
-							// console.log($(this));
-						});
+								// После добавления всех checkbox
+					    		$('#find-division-block').append(button)		
+					    						
 
-						// РЕДАКТОР ПОДРАЗДЕЛЕНИЙ
-						$('#edit-collaborator-info--division').click(function() {
-
-							$('#collaborator-update-division').show()
-
-							var select_org = $('#collaborator-info--org').text()
-							// console.log(select_org)
-
-							// Запускаем тот же выбор что и в поиске
-							$.ajax({
-								type: "POST",
-								url: "/pp/Ext/extjs_json_collection_data.html",
-								dataType: "json",
-								data: {
-									collection_code: "rc_task_finally_division",
-									parameters: 'checked=' + select_org
-								},
-								success: function (data, textStatus, jqXHR) {
-
-									// Обнуляем #select-collaborator-update-division
-									$('#select-collaborator-update-division').text('')
-
-									// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-									var button = $('<button id="update-division-search">Выбрать</button>')
-									button.click(function() {
-										// Заменяем текущую организацию
-										// Очищаем подразделение
+					    		$('#division-search').click(function() {
+					    		 		$('#block').css({'z-index': 0});	    				
+					    				// Выбранные элементы
+					    				var checked = []
+					    				// Получаем DOM структуру #division-search
 					    				var division_search_DOM = $(this).context.parentNode.children
 					    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
 					    					if (division_search_DOM[i].checked) {
-					    						$('#collaborator-info--division').text(division_search_DOM[i].value)
+					    						checked.push({
+					    							id: division_search_DOM[i].id,
+					    							name: division_search_DOM[i].value
+					    						})
 					    					}
 					    				}
-										// $('#collaborator-info--division').text('')
-										$('#collaborator-update-division').hide()
-									})
+					    				// Массив из объектов выбранных элементов 
+					    				// {id: "6537284716620812580", name: "Yandex"}
 
-									for (elem in data.results) {
-										var id = data.results[elem].id
-										var name = data.results[elem].name
-										var input = $('<input type="radio" name="division" value="' + name + '" id="select' + id + '" checked />')
-										var label = $('<label for="select' + id + '">"' + name + '"</label><br>')
+					    				// Если есть checked - прорисовываем
+					    				if (checked.length > 0) {
+					    					// Вставляем выбранные элементы после #search-block__division
 
-							    		$('#select-collaborator-update-division').append(input)					
-							    		$('#select-collaborator-update-division').append(label)					
-									}
+					    					// Очищаем от старых значений
+											$('.checked-division').remove()
+					    					
+					    					for (elem in checked) {
+					    						var name = checked[elem].name
+									    		var tr = $('<tr></tr>')
+									    		var td = $('<td></td>')
+									    		var button = $('<button>X</button>')
+									    		button.click(function() {
+									    			// Удаляем блок
+									    			$(this).context.parentNode.parentNode.remove()
+									    		})
+									    		td.append(button)
+									    		tr.addClass('checked-division')
+									    		tr.append('<td>' + name + '</td>')
+									    		tr.append(td)
+				    							$('#search-block__division').after(tr)			    						
+					    					}
+					    				}
 
-									// После добавления всех radio
-						    		$('#select-collaborator-update-division').append(button)	
-								}
-							});
-
+					    				$('#division-block').hide()
+					    		});
+								// =====================================================
+							}
 						});
-						// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-						// ===============================================================================	
-					
-	    			$('#result').show()
-				}, 200);
-		    });
-		});
-	</script>
-</body>
-</html>
+
+						setTimeout(function() {
+			    			$('#division-block').show()
+						}, 200);	
+				    });				
+				    // ====================================	
+				    // ПОИСК
+				    $('#search').click(search);
+				});
+			</script>
+		</body>
+		</html>
 ```
 Выборка rc_task_finally   
 ``` javascript
@@ -938,9 +924,13 @@ RESULT = [];
 
 // Создать переменные: 
 // fullname
+// ФИО – брать из карточки сотрудника 
 // position
+// Должность – брать из карточки должности 
 // org
+// Организация – брать из карточки организации 
 // division
+// Подразделение – брать из карточки подразделения 
 
 request = {
 	fullname: "",
@@ -1034,6 +1024,7 @@ if (__temp_division.length) {
 	request.division = ""
 }
 
+
 // AND, WHERE ===================================
 if (request.fullname != "" && request.position != "" || request.fullname != "" && request.org != "" || request.fullname != "" && request.division != "") {
 	and1 = " and " 
@@ -1063,6 +1054,7 @@ if (request.fullname != "" || request.position != "" || request.org != "" || req
 var str = "for $elem in collaborators " + where + request.fullname + and1 + request.position + and2 + request.org + and3 + request.division + " return $elem"
 
 data = XQuery(str);
+
 
 for (elem in data)
 {	
@@ -1096,7 +1088,7 @@ data_org = XQuery("for $elem in orgs return $elem");
 
 list_orgs = []
 // [{id: 6537284716620812579, name: 'ООО Рога и Копыта'},
-// {id: 6537284716620812580, name: 'Yandex'}]
+ // {id: 6537284716620812580, name: 'Yandex'}]
 
 for (elem in data_org)
 {
@@ -1113,7 +1105,9 @@ for (elem in data_org)
 // ["Yandex", "ООО Рога и Копыта"]
 checked = checked.split(',')
 
+
 stop_list_id = []
+
 
 for (check in checked) {
 	for (org in list_orgs)
@@ -1124,6 +1118,7 @@ for (check in checked) {
 		}
 	}
 }
+
 
 for (elem in data)
 {
@@ -1172,11 +1167,38 @@ alert(division)
 
 // По id заходим в карточку сотрудника
 __item = ArrayOptFirstElem(XQuery("for $elem in collaborators where $elem/id=" + id + " return $elem"));
+
+__item_in_position = ArrayOptFirstElem(XQuery("for $elem in positions where $elem/basic_collaborator_id=" + id + " return $elem"));  
+
+// Изменения в карточке сотрудника
 if (__item != undefined)
 {
 	// Изменяем данные
 	__item.fullname = fullname
+	// Необходимо изменить id position_name, org_name, position_parent_name 
+	__item.position_name = position
+	__item.org_name = org
+	__item.position_parent_name = division
+
+	// Для новых сотрудников
+	// __item.position_id
+	// __item.org_id
+	// __item.position_parent_id
 }
+
+// Изменения в карточке должности
+if (__item_in_position != undefined)
+{
+	__item_in_position.name = position
+}
+
+// Если такой позиции не было
+__new_position = OpenNewDoc( 'x-local://wtv/wtv_position.xmd');
+__new_position.TopElem.name = position;
+// __item_in_position.org_id // изменить на выбранную организацию
+// __item_in_position.parent_object_id // изменить на выбранную позицию
+__new_position.BindToDb();
+__new_position.Save();
 
 MESSAGE = "Cохранение прошло успешно";
 ```
