@@ -78,6 +78,9 @@
 			        padding: 5px;
 			        border-bottom: 1px solid #ccc;
 			    }
+			    th {
+			    	cursor: pointer;
+			    }
 			</style>
 		</head>
 		<body>	
@@ -120,13 +123,18 @@
 			<!-- RESULT -->
 			<div id="result" class="result">
 				<table id="filter-table">
+				  <thead>				  	
 				    <tr>
-				        <th class="collaborator-id">id</th>
-				        <th>ФИО</th>
-				        <th>Должность</th>
-				        <th>Организация</th>
-				        <th>Подразделение</th>
+				        <th class="collaborator-id" data-type="number">id</th>
+				        <th data-type="string">ФИО</th>
+				        <th data-type="string">Должность</th>
+				        <th data-type="string">Организация</th>
+				        <th data-type="string">Подразделение</th>
 				    </tr>
+				  </thead>
+				  <tbody id="tbody">
+				  	
+				  </tbody>
 				</table>
 			</div>
 			<!-- MODAL -->
@@ -245,7 +253,8 @@
 								    	tr.append(td)
 								    }		
 
-						    		$('#filter-table').append(tr)					
+						    		// $('#filter-table').append(tr)					
+						    		$('#tbody').append(tr)					
 								}
 								// Прорисовка таблицы =====================
 							}
@@ -357,11 +366,12 @@
 										lastname: fullname[0],
 										firstname: fullname[1],
 										middlename: fullname[2],
+										// Первоначальное значение позиции
 										position: select_item[2].textContent,
 										org: select_item[3].textContent,
 										division: select_item[4].textContent,
 									}
-									// console.log(user)
+									// console.log(user.position)
 
 									$('#collaborator-info').show()
 
@@ -466,34 +476,37 @@
 							edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
 						}
 					});
+					var old_position;
 					$('#edit-collaborator-info--position').click(function() {
 
-
+						// Заполнение новой позиции
 						if ($(this).context.parentNode.parentNode.children[1].textContent === '') {
-							// Если у сотрудника не указана должность, то поле доступно для редактирования только после заполнения фильтров организации и подразделения. 
-	
+
+							// Если у сотрудника не указана должность, то поле доступно для редактирования только после заполнения фильтров организации и подразделения. 	
 							if ($('#collaborator-info--org')[0].textContent === '' || $('#collaborator-info--division')[0].textContent === '') {
 								alert('Выберите организацию и подразделение')
 							} else {
 								if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
+									// Изменяемое поле
+									var edit_items = $(this).context.parentNode.parentNode.children[1]
 
-								// Получить текст изменяемого поля
-								var input = document.createElement('input');
-								input.value = edit_items.textContent;							
-								edit_items.textContent = ''						
-								edit_items.append(input)
+									// Получить текст изменяемого поля
+									var input = document.createElement('input');
 
-								$(this).context.parentNode.children[0].textContent = 'ок';
-							} else {
-								$(this).context.parentNode.children[0].textContent = 'Редактировать';
-								// Изменяемое поле
-								var edit_items = $(this).context.parentNode.parentNode.children[1]
-								// Считываем значение из input 
-								edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
+									input.value = edit_items.textContent;							
+									edit_items.textContent = ''						
+									edit_items.append(input)
+
+									$(this).context.parentNode.children[0].textContent = 'ок';
+								} else {
+									$(this).context.parentNode.children[0].textContent = 'Редактировать';
+									// Изменяемое поле
+									var edit_items = $(this).context.parentNode.parentNode.children[1]
+									// Считываем значение из input 
+									edit_items.textContent = $(this).context.parentNode.parentNode.children[1].children[0].value;	
+								}
 							}
-							}
+						// Изменение существующей позиции
 						} else {
 							if ($(this).context.parentNode.children[0].textContent === 'Редактировать') {
 								// Изменяемое поле
@@ -501,6 +514,10 @@
 
 								// Получить текст изменяемого поля
 								var input = document.createElement('input');
+								// Старая позиция - edit_items.textContent
+								// Вывожу глобально !!!
+								old_position = edit_items.textContent
+
 								input.value = edit_items.textContent;							
 								edit_items.textContent = ''						
 								edit_items.append(input)
@@ -647,11 +664,22 @@
 
 							var fullname = lastname + ' ' + firstname + ' ' + middlename 
 
+							// Если позицию не изменяли 
+							if (old_position == undefined) {
+								old_position = ""
+							}
+
 							//работа с удаленным действием 
 							regAction = {
 								name : "re_task_finally_1", //код удаленного действия
 								options: [{ name: "id", value: id },
+										 { name: "lastname", value: lastname },
+										 { name: "firstname", value: firstname },
+										 { name: "middlename", value: middlename },
 										 { name: "fullname", value: fullname },
+										 // Нужна отправка старой позиции
+										 { name: "old_position", value: old_position},
+										 // Отправка новой позиции
 										 { name: "position", value: position},
 										 { name: "org", value: org},
 										 { name: "division", value: division}
@@ -913,8 +941,64 @@
 				    $('#search').click(search);
 				});
 			</script>
+			<script>
+			    // сортировка таблицы
+			    // использовать делегирование!
+			    // должно быть масштабируемо:
+			    // код работает без изменений при добавлении новых столбцов и строк
+
+			    var grid = document.getElementById('filter-table');
+
+			    grid.onclick = function(e) {
+			      if (e.target.tagName != 'TH') return;
+
+			      // Если TH -- сортируем
+			      sortGrid(e.target.cellIndex, e.target.getAttribute('data-type'));
+			    };
+
+			    function sortGrid(colNum, type) {
+			      var tbody = grid.getElementsByTagName('tbody')[0];
+			      console.log(tbody)
+			      // Составить массив из TR
+			      var rowsArray = [].slice.call(tbody.rows);
+			      console.log(rowsArray)
+
+			      // определить функцию сравнения, в зависимости от типа
+			      var compare;
+
+			      switch (type) {
+			        case 'number':
+			          compare = function(rowA, rowB) {
+			            return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML;
+			          };
+			          break;
+			        case 'string':
+			          compare = function(rowA, rowB) {
+			          	console.log(1, rowA.cells[colNum].textContent)
+			          	console.log(2, rowB.cells[colNum].textContent)
+			            return rowA.cells[colNum].textContent > rowB.cells[colNum].textContent;
+			          };
+			          break;
+			      }
+
+			      // сортировать
+			      rowsArray.sort(compare);
+
+			      // Убрать tbody из большого DOM документа для лучшей производительности
+			      grid.removeChild(tbody);
+
+			      // добавить результат в нужном порядке в TBODY
+			      // они автоматически будут убраны со старых мест и вставлены в правильном порядке
+			      for (var i = 0; i < rowsArray.length; i++) {
+			        tbody.appendChild(rowsArray[i]);
+			      }
+
+			      grid.appendChild(tbody);
+
+			    }
+			  </script>
 		</body>
-		</html>
+</html>
 ```
 Выборка rc_task_finally   
 ``` javascript
@@ -942,12 +1026,22 @@ request = {
 // Собираем строку запроса ========================================
 if (fullname) {
 	request.fullname = "contains($elem/fullname, '"+ fullname +"')" 
+	// select_fullname = XQuery("for $elem in collaborators where contains($elem/fullname, '"+ fullname +"') return $elem");
+	// for (elem in select_fullname) {
+	// 	// Получаем id отобранных fullname 
+	// 	alert(elem.id.Value)
+	// }
 } else {
 	request.fullname = ""
 }
 
+// Изменить выборку позиции, через id usera
 if (position) {
 	request.position = "contains($elem/position_name, '"+ position +"')" 
+	// for (elem in select_fullname) {
+	// 	select_position = XQuery("for $elem in positions where contains($elem/basic_collaborator_id, '"+ elem.id.Value +"') return $elem");
+	// 	alert(ArrayOptFirstElem(select_position).name.Value)
+	// }
 } else {
 	request.position = ""
 }
@@ -1055,7 +1149,6 @@ var str = "for $elem in collaborators " + where + request.fullname + and1 + requ
 
 data = XQuery(str);
 
-
 for (elem in data)
 {	
 
@@ -1105,9 +1198,7 @@ for (elem in data_org)
 // ["Yandex", "ООО Рога и Копыта"]
 checked = checked.split(',')
 
-
 stop_list_id = []
-
 
 for (check in checked) {
 	for (org in list_orgs)
@@ -1118,7 +1209,6 @@ for (check in checked) {
 		}
 	}
 }
-
 
 for (elem in data)
 {
@@ -1177,7 +1267,6 @@ collaboratorXML.Save()
 // Если позиции не было
 if (old_position === "") {
 
-
 	newPositionXML = OpenNewDoc( 'x-local://wtv/wtv_position.xmd');
 	newPositionXML.TopElem.name = position;
 	newPositionXML.TopElem.org_id = Int(ArrayOptFirstElem(XQuery("for $elem in orgs where $elem/name='" + org + "' return $elem")).id.Value);
@@ -1213,7 +1302,6 @@ if (old_position !== position) {
 	positionXML.Save();
 }
 
-
 // По id заходим в карточку сотрудника
 __item = ArrayOptFirstElem(XQuery("for $elem in collaborators where $elem/id=" + id + " return $elem"));
 
@@ -1228,8 +1316,6 @@ if (__item != undefined)
 	// Основное подразделение
 	__item.position_parent_name = division
 	__item.position_parent_id = Int(ArrayOptFirstElem(XQuery("for $elem in subdivisions  where $elem/name='" + division + "' return $elem")).id.Value);
-
 }
-
 MESSAGE = "Cохранение прошло успешно";
 ```
