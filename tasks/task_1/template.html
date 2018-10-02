@@ -5,7 +5,7 @@
 			<title>Task_1</title>
 			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 			<style>	
-				.search-block {
+				.search-module {
 					width: 80%;
 					margin: 0 auto;
 					background: lightblue;
@@ -15,9 +15,9 @@
 					padding: 5px;
 				}
 
-				.org-block,
-				.division-block,
-				.collaborator-info {
+				.org-module,
+				.division-module,
+				.clb-info {
 					background: khaki;
 					border: 1px solid black;
 					position: absolute;
@@ -27,7 +27,7 @@
 					width: 80%;
 					padding: 5px;
 				}
-				.collaborator {
+				.clb {
 					cursor: pointer;
 				}
 				.result {
@@ -37,16 +37,16 @@
 					z-index: 1;
 					background: white;
 				}
-				.collaborator-info__table td{
+				.clb-info__table td{
 					width: 40%;
 				}
-				.collaborator-id,
-				#collaborator-info--id {
+				.clb-id,
+				#clb-info__table--id {
 					display: none;
 				}
 				
-				.collaborator-update-org,
-				.collaborator-update-division {
+				.clb-update-org,
+				.clb-update-division {
 					background: lightgreen;
 					border: 1px solid black;
 					position: absolute;
@@ -56,7 +56,7 @@
 					width: 40%;
 					padding: 5px;
 				}
-				.block {
+				.shade-module {
 					background: rgba(123, 123, 43, .3);
 					position: absolute;
 					width: 100%;
@@ -85,7 +85,7 @@
 		<body>	
 
 			<!-- SEARCH -->
-			<div id="search-block" class="search-block">
+			<div id="search-module" class="search-module">
 				<table>
 					<tr>
 						<td><label for="fullname">ФИО:</label>	</td>
@@ -95,11 +95,11 @@
 						<td><label for="position">Должность:</label></td>
 						<td><input class="input-field" id="position" type="text"></td>
 					</tr>
-					<tr id="search-block__org">
+					<tr id="search-module__org">
 						<td><label for="org">Организация:</label></td>
 						<td><input class="input-field" id="org-button" type="button" value="Выбрать"></td>
 					</tr>
-					<tr id="search-block__division">
+					<tr id="search-module__division">
 						<td><label for="division">Подразделение:</label></td>
 						<td><input class="input-field" id="division-button" type="button" value="Выбрать"></td>
 					</tr>
@@ -110,13 +110,13 @@
 				</table>
 			</div>
 			<!-- ORG -->
-			<div id="org-block" class="org-block">
-				<div id="find-org-block">
+			<div id="org-module" class="org-module">
+				<div id="find-org-module">
 				</div>
 			</div>
 			<!-- DIVISION -->
-			<div id="division-block" class="division-block">	
-				<div id="find-division-block">
+			<div id="division-module" class="division-module">	
+				<div id="find-division-module">
 				</div>		
 			</div>
 			<!-- RESULT -->
@@ -124,78 +124,80 @@
 				<table id="filter-table">
 				  <thead>				  	
 				    <tr>
-				        <th class="collaborator-id" data-type="number">id</th>
+				        <th class="clb-id" data-type="number">id</th>
 				        <th data-type="string">ФИО</th>
 				        <th data-type="string">Должность</th>
 				        <th data-type="string">Организация</th>
 				        <th data-type="string">Подразделение</th>
 				    </tr>
 				  </thead>
-				  <tbody id="tbody">
-				  	
-				  </tbody>
+				  <tbody id="tbody"></tbody>
 				</table>
 			</div>
 			<!-- MODAL -->
-			<div id="collaborator-info" class="collaborator-info">
-				<table class="collaborator-info__table">
+			<div id="clb-info" class="clb-info">
+				<table class="clb-info__table">
 					<tr>
-						<td id="collaborator-info--id"></td>
+						<td id="clb-info__table--id"></td>
 					</tr>
 					<tr>
 						<td>Фамилия:</td>
-						<td id="collaborator-info--lastname"></td>
-						<td><button id="edit-collaborator-info--lastname">Редактировать</button></td>
+						<td id="clb-info__table--lastname"></td>
+						<td><button id="edit-clb-info__table--lastname">Редактировать</button></td>
 					</tr>
 					<tr>
 						<td>Имя:</td>
-						<td id="collaborator-info--firstname"></td>
-						<td><button id="edit-collaborator-info--firstname">Редактировать</button></td>
+						<td id="clb-info__table--firstname"></td>
+						<td><button id="edit-clb-info__table--firstname">Редактировать</button></td>
 					</tr>
 					<tr>
 						<td>Отчество:</td>
-						<td id="collaborator-info--middlename"></td>
-						<td><button id="edit-collaborator-info--middlename">Редактировать</button></td>
+						<td id="clb-info__table--middlename"></td>
+						<td><button id="edit-clb-info__table--middlename">Редактировать</button></td>
 					</tr>
 					<tr>
 						<td>Должность:</td>
-						<td id="collaborator-info--position"></td>
-						<td><button id="edit-collaborator-info--position">Редактировать</button></td>
+						<td id="clb-info__table--position"></td>
+						<td><button id="edit-clb-info__table--position">Редактировать</button></td>
 					</tr>
 					<tr>
 						<td>Организация:</td>
-						<td id="collaborator-info--org"></td>
-						<td><button id="edit-collaborator-info--org">Редактировать</button></td>
+						<td id="clb-info__table--org"></td>
+						<td><button id="edit-clb-info__table--org">Редактировать</button></td>
 					</tr>
 					<tr>
 						<td>Подразделение:</td>
-						<td id="collaborator-info--division"></td>
-						<td><button id="edit-collaborator-info--division">Редактировать</button></td>
+						<td id="clb-info__table--division"></td>
+						<td><button id="edit-clb-info__table--division">Редактировать</button></td>
 					</tr>
 					<tr>
-						<td><button id="collaborator-save">Сохранить</button></td>
+						<td id="clb-info__table--org--id"></td>
+					</tr>
+					<tr>
+						<td id="clb-info__table--division--id"></td>
+					</tr>
+					<tr>
+						<td><button id="clb-save">Сохранить</button></td>
 						<td></td>
 					</tr>
 				</table>
 			</div>
 			<!-- MODAL select ORG -->
-			<div id="collaborator-update-org" class="collaborator-update-org">
-				<div id="select-collaborator-update-org">
+			<div id="clb-update-org" class="clb-update-org">
+				<div id="select-clb-update-org">
 				</div>
 			</div>
 			<!-- MODAL select DIVISION -->
-			<div id="collaborator-update-division" class="collaborator-update-division">
-				<div id="select-collaborator-update-division">
+			<div id="clb-update-division" class="clb-update-division">
+				<div id="select-clb-update-division">
 				</div>
 			</div>
-			<div id="block" class="block"></div>
+			<div id="shade-module" class="shade-module"></div>
 			<script>
 				$( document ).ready(function() {
-
 					// Поиск результатов
 					var search = function() {
 						$('.table-data').remove()
-
 				    	// Введенные значения
 			    		var fullname = $('#fullname').val()
 			    		var position = $('#position').val()
@@ -203,12 +205,10 @@
 			    		$.each( $('[data-org-id]'), function(key, value) {
 			    			orgs.push($(this).data('orgId'))
 			    		})
-
 			    		var divisions = []
 			    		$.each( $('[data-division-id]'), function(key, value) {
 			    			divisions.push($(this).data('divisionId'))
 			    		})
-
 				    	// Обращение к выборке
 						$.ajax({
 							type: "POST",
@@ -230,21 +230,22 @@
 								    	var td = $('<td></td>')
 
 								    	if (i === 0) {
-								    		td.addClass('collaborator-id')
+								    		td.addClass('clb-id')
 								    		td.attr('id', data.results[elem].id )
 								    		td.text(data.results[elem].id)
 
 								    	} else if (i === 1) {
-								    		td.addClass('collaborator')
+								    		td.addClass('clb')
 								    		td.text(data.results[elem].fullname)
 								    	} else if (i === 2) {
 								    		td.text(data.results[elem].position)
 								    	} else if (i === 3) {
 								    		td.text(data.results[elem].org)
-								    		td.attr("data-info-org-id", data.results[elem].org_id);
+								    		td.attr("data-info-org-id", data.results[elem].org_id || "");
 
 								    	} else if (i === 4) {
 								    		td.text(data.results[elem].division)
+								    		td.attr("data-info-division-id", data.results[elem].division_id || "");
 								    	}		 			
 								    	
 								    	tr.append(td)
@@ -257,7 +258,9 @@
 						});
 
 						// Обработка ajax
-						setTimeout(collaborator, 200);
+						setTimeout(function() {
+							$('#result').show()
+						}, 200);
 					}
 
 					// Для удаленного действия
@@ -347,57 +350,45 @@
 						}
 					};
 
-					var old_position;
-
-					function collaborator() {
-						// Работа с элементами результатов ============================
-						$('.collaborator').click(function() {
-							$('#block').css({'z-index': 2});
-
-
+					$(document).on('click', '.clb', function () {
+						$('#shade-module').css({'z-index': 2});
 							var select_item = $(this).context.parentNode.children;
+
 							// Получаем id выбранного элемента
 							var fullname = $(select_item[1]).text().split(' ');
+
 							var user = {
 								id: $(select_item[0]).text(),
 								lastname: fullname[0],
 								firstname: fullname[1],
 								middlename: fullname[2],
-								// Первоначальное значение позиции
 								position: $(select_item[2]).text(),
 								org: $(select_item[3]).text(),
 								org_id: $(select_item[3]).data('infoOrgId'),
-								division: $(select_item[4]).text()
+								division: $(select_item[4]).text(),
+								division_id: $(select_item[4]).data('infoDivisionId'),
 							}
 
-							// console.log($(select_item[3]).data('infoOrgId'))
 
-							$('#collaborator-info').show()
+							$('#clb-info').show()
 
-							$('#collaborator-info--id').text(user.id)
-							$('#collaborator-info--lastname').text(user.lastname)
-							$('#collaborator-info--firstname').text(user.firstname)
-							$('#collaborator-info--middlename').text(user.middlename)
-							$('#collaborator-info--position').text(user.position)
+							$('#clb-info__table--id').text(user.id)
+							$('#clb-info__table--lastname').text(user.lastname)
+							$('#clb-info__table--firstname').text(user.firstname)
+							$('#clb-info__table--middlename').text(user.middlename)
+							$('#clb-info__table--position').text(user.position)
+							$('#clb-info__table--org').text(user.org)
+							$('#clb-info__table--org--id').text(user.org_id)
+							$('#clb-info__table--division').text(user.division)
+							$('#clb-info__table--division--id').text(user.division_id)
+					});
 
-							old_position = $('#collaborator-info--position').text(user.position)
-
-							$('#collaborator-info--org').text(user.org)
-							$('#collaborator-info--org').attr("data-info-org-id-2", user.org_id)
-							$('#collaborator-info--division').text(user.division)
-						});					
-
-							
-
-						
-		    			$('#result').show()
-					}
 
 					// + EDIT FULLNAME 
 					$.each(['lastname', 'firstname', 'middlename'], function(index, value) {
-						$('#edit-collaborator-info--' + value + '').click(function() {
-							var button_text = $('#edit-collaborator-info--' + value + '')
-							var edit_items = $('#collaborator-info--' + value + '')
+						$('#edit-clb-info__table--' + value + '').click(function() {
+							var button_text = $('#edit-clb-info__table--' + value + '')
+							var edit_items = $('#clb-info__table--' + value + '')
 							if ( button_text.text() === 'Редактировать' ) {
 								$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_' + value + '"></input>')
 								$(button_text).text('ок')
@@ -408,21 +399,20 @@
 						});						
 					})
 
-					$('#edit-collaborator-info--position').click(function() {
+					$('#edit-clb-info__table--position').click(function() {
 
-						var button_text = $('#edit-collaborator-info--position')
-						var edit_items = $('#collaborator-info--position')
+						var button_text = $('#edit-clb-info__table--position')
+						var edit_items = $('#clb-info__table--position')
 
 						// Заполнение новой позиции
 						if ( edit_items.text() === '' ) {
 							// Если у сотрудника не указана должность, то поле доступно для редактирования только после заполнения фильтров организации и подразделения. 	
-							if ($('#collaborator-info--org').text() === '' || $('#collaborator-info--division').text() === '') {
+							if ($('#clb-info__table--org').text() === '' || $('#clb-info__table--division').text() === '') {
 								alert('Выберите организацию и подразделение')
 							} else {
 							if ( button_text.text() === 'Редактировать' ) {
 								$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_position"></input>')
 								$(button_text).text('ок')
-								old_position = ""
 							} else {
 								$(button_text).text('Редактировать')
 								$(edit_items).text($('#update_position').val())
@@ -433,23 +423,19 @@
 							if ( button_text.text() === 'Редактировать' ) {
 								$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_position"></input>')
 								$(button_text).text('ок')
-								old_position = $(edit_items).text()
 							} else {
 								$(button_text).text('Редактировать')
 								$(edit_items).text($('#update_position').val())
 							}
 						}
-
 					});
 
-
 					// РЕДАКТОР ОРГАНИЗАЦИИ
-					$('#edit-collaborator-info--org').click(function() {
-						$('#block').css({'z-index': 6});
+					$('#edit-clb-info__table--org').click(function() {
+						$('#shade-module').css({'z-index': 6});
 
-						$('#collaborator-update-org').show()
+						$('#clb-update-org').show()
 
-						// Запускаем тот же выбор что и в поиске
 						$.ajax({
 							type: "POST",
 							url: "/pp/Ext/extjs_json_collection_data.html",
@@ -459,50 +445,47 @@
 								parameters: ''
 							},
 							success: function (data, textStatus, jqXHR) {
-
-
-								// Обнуляем #select-collaborator-update-org
-								$('#select-collaborator-update-org').text('')
+								// Обнуляем 
+								$('#select-clb-update-org').text('')
 
 								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
 								var button = $('<button id="update-org-search">Выбрать</button>')
 								button.click(function() {
-									$('#block').css({'z-index': 2});
-									// Заменяем текущую организацию
-									// Очищаем подразделение
+									$('#shade-module').css({'z-index': 2});
+
 				    				var org_search_DOM = $(this).context.parentNode.children
 				    				for (var i = 0, max = org_search_DOM.length; i < max; i++) {
 				    					if (org_search_DOM[i].checked) {
-				    						$('#collaborator-info--org').text(org_search_DOM[i].value)
+				    						$('#clb-info__table--org--id').text(org_search_DOM[i].id)
+				    						$('#clb-info__table--org').text(org_search_DOM[i].value)
 				    					}
 				    				}
-									$('#collaborator-info--division').text('')
-									$('#collaborator-update-org').hide()
+									$('#clb-info__table--division').text('')
+									$('#clb-update-org').hide()
 								})
 
 								for (elem in data.results) {
 									var id = data.results[elem].id
 									var name = data.results[elem].name
-									var input = $('<input type="radio" name="org" value="' + name + '" id="select' + id + '" checked />')
-									var label = $('<label for="select' + id + '">"' + name + '"</label><br>')
+									var input = $('<input type="radio" name="org" value="' + name + '" id="' + id + '" checked />')
+									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
 
-						    		$('#select-collaborator-update-org').append(input)					
-						    		$('#select-collaborator-update-org').append(label)					
+						    		$('#select-clb-update-org').append(input)				
+						    		$('#select-clb-update-org').append(label)				
 								}
 
 								// После добавления всех radio
-					    		$('#select-collaborator-update-org').append(button)	
-
+					    		$('#select-clb-update-org').append(button)	
 							}
 						});
 					});
 					// РЕДАКТОР ПОДРАЗДЕЛЕНИЙ
-					$('#edit-collaborator-info--division').click(function() {
-						$('#block').css({'z-index': 6});
+					$('#edit-clb-info__table--division').click(function() {
+						$('#shade-module').css({'z-index': 6});
 
-						$('#collaborator-update-division').show()
+						$('#clb-update-division').show()
 
-						checked = $('#collaborator-info--org').data('info-org-id-2')
+						checked = $('#clb-info__table--org--id').text()
 
 						$.ajax({
 							type: "POST",
@@ -513,123 +496,117 @@
 								parameters: 'checked=' + checked
 							},
 							success: function (data, textStatus, jqXHR) {
-
-								console.log(data.results)
-								// Обнуляем #select-collaborator-update-division
-								$('#select-collaborator-update-division').text('')
+								// Обнуляем 
+								$('#select-clb-update-division').text('')
 
 								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
 								var button = $('<button id="update-division-search">Выбрать</button>')
 								button.click(function() {
-									$('#block').css({'z-index': 2});
+									$('#shade-module').css({'z-index': 2});
 									// Заменяем текущую организацию
 									// Очищаем подразделение
 				    				var division_search_DOM = $(this).context.parentNode.children
 				    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
 				    					if (division_search_DOM[i].checked) {
-				    						$('#collaborator-info--division').text(division_search_DOM[i].value)
+				    						$('#clb-info__table--division--id').text(division_search_DOM[i].id)
+				    						$('#clb-info__table--division').text(division_search_DOM[i].value)
 				    					}
 				    				}
-									// $('#collaborator-info--division').text('')
-									$('#collaborator-update-division').hide()
+									$('#clb-update-division').hide()
 								})
 
 								for (elem in data.results) {
 									var id = data.results[elem].id
 									var name = data.results[elem].name
-									var input = $('<input type="radio" name="division" value="' + name + '" id="select' + id + '" checked />')
-									var label = $('<label for="select' + id + '">"' + name + '"</label><br>')
+									var input = $('<input type="radio" name="division" value="' + name + '" id="' + id + '" checked />')
+									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
 
-						    		$('#select-collaborator-update-division').append(input)					
-						    		$('#select-collaborator-update-division').append(label)					
+						    		$('#select-clb-update-division').append(input)			
+						    		$('#select-clb-update-division').append(label)			
 								}
 
 								// После добавления всех radio
-					    		$('#select-collaborator-update-division').append(button)	
+					    		$('#select-clb-update-division').append(button)	
 							}
 						});
 					});
 
 					// Сохранение измененных данных
-					$('#collaborator-save').click(function() {
-						// Проверка заполнены ли все поля
-						if ($('#collaborator-info--firstname').text() || $('#collaborator-info--lastname').text() || $('#collaborator-info--middlename').text() || $('#collaborator-info--position').text() || $('#collaborator-info--org').text() || $('#collaborator-info--division').text()) {
-							alert('Заполните все поля')
-						} else {							
-							// Проверка все ли изменения подтверждены
-							if ($('#edit-collaborator-info--lastname').text() === 'ок' || $('#edit-collaborator-info--firstname').text() === 'ок'|| $('#edit-collaborator-info--middlename').text() === 'ок' || $('#edit-collaborator-info--position').text() === 'ок') {
-								alert('Подтвердите все изменения')
-							} else {
-								// ОБНОВЛЯЕМ ДАННЫЕ НА СЕРВЕРЕ 
-								$('#block').css({'z-index': 0});
-								$('#collaborator-info').hide()
+					$('#clb-save').click(function() {
+						var save_item = $(this).parent().parent().parent().first().children();
 
-								var info_arr = $(this).context.parentNode.parentNode.parentNode.children
-								// [id, lastname, firstname, middlename, position, org, division, ...]
+						var info = {
+							id: $('#clb-info__table--id').text(),
+							firstname: $('#clb-info__table--firstname').text(),
+							lastname: $('#clb-info__table--lastname').text(),
+							middlename: $('#clb-info__table--middlename').text(),
+							position: $('#clb-info__table--position').text(),
+							// id
+							org: $('#clb-info__table--org--id').text(),
+							// id
+							division: $('#clb-info__table--division--id').text(),
 
-								var id = info_arr[0].textContent.replace( /\s/g, "")
-								var lastname = info_arr[1].children[1].textContent
-								var firstname = info_arr[2].children[1].textContent
-								var middlename = info_arr[3].children[1].textContent
-								var position = info_arr[4].children[1].textContent
-								var org = info_arr[5].children[1].textContent
-								var division = info_arr[6].children[1].textContent
+							// ок или Редактировать =============================================
+							firstname_button_text: $('#edit-clb-info__table--firstname').text(), 
+							lastname_button_text: $('#edit-clb-info__table--lastname').text(), 
+							middlename_button_text: $('#edit-clb-info__table--middlename').text(), 
+							position_button_text: $('#edit-clb-info__table--position').text() 
+						}
 
-								var fullname = lastname + ' ' + firstname + ' ' + middlename 
+						if ( info.firstname_button_text === "ок" || info.lastname_button_text === "ок" || info.middlename_button_text === "ок" || info.position_button_text === "ок") {
+							return alert("Подтвердите все изменения")
+						}
 
-								// Если позицию не изменяли 
-								if (old_position == undefined) {
-									old_position = ""
+						if ( !Boolean(info.firstname && info.lastname && info.middlename && info.position && info.org && info.division)) {
+							// console.log("Заполнены не все поля")
+						}
+					
+
+						$('#shade-module').css({'z-index': 0});
+						$('#clb-info').hide()
+
+						var fullname = info.lastname + ' ' + info.firstname + ' ' + info.middlename 
+
+						regAction = {
+							name : "re_task_finally_1", //код удаленного действия
+							options: [
+										 { name: "id", value: info.id },
+										 { name: "lastname", value: info.lastname },
+										 { name: "firstname", value: info.firstname },
+										 { name: "middlename", value: info.middlename },
+										 { name: "fullname", value: fullname },
+										 { name: "position", value: info.position},
+										 { name: "org", value: info.org},
+										 { name: "division", value: info.division}
+									 ],
+
+							callback_f : function(_doc){
+								// waitWindow.hide();
+								if (_doc.error == 0)
+								{
+									// Обновляем таблицу
+									return search();
 								}
-
-								// console.log(old_position)
-
-								//работа с удаленным действием 
-								regAction = {
-									name : "re_task_finally_1", //код удаленного действия
-									options: [{ name: "id", value: id },
-											 { name: "lastname", value: lastname },
-											 { name: "firstname", value: firstname },
-											 { name: "middlename", value: middlename },
-											 { name: "fullname", value: fullname },
-											 // Нужна отправка старой позиции
-											 { name: "old_position", value: old_position},
-											 // Отправка новой позиции
-											 { name: "position", value: position},
-											 { name: "org", value: org},
-											 { name: "division", value: division}
-											 ],
-
-									callback_f : function(_doc){
-										// waitWindow.hide();
-										if (_doc.error == 0)
-										{
-											// Обновляем таблицу
-											return search();
-										}
-										else
-										{
-											alert(0)
-										}
-									}
-								} 
-								// пример коллбэка на ответ, его может не быть, 
-								// _doc - возвращаемый объект, содержит поля error, type, messageText, result
-								remoteAction(regAction);							
-							}							
-						}						
+								else
+								{
+									alert("ERR")
+								}
+							}
+						} 
+						// пример коллбэка на ответ, его может не быть, 
+						// _doc - возвращаемый объект, содержит поля error, type, messageText, result
+						remoteAction(regAction);					
 					});
 
-
 					// Скрываем блоки выбора 
-					$.each(['org-block', 'division-block', 'result', 'collaborator-info', 'collaborator-update-org', 'collaborator-update-division'], function(index, value) {
+					$.each(['org-module', 'division-module', 'result', 'clb-info', 'clb-update-org', 'clb-update-division'], function(index, value) {
 						$('#' + value).hide()
 					});
 
 		       		// ВЫБОРКИ ============================
 		       		// Организации
 				    $('#org-button').click(function() {
-				    	$('#block').css({'z-index': 2});
+				    	$('#shade-module').css({'z-index': 2});
 						$.ajax({
 							type: "POST",
 							url: "/pp/Ext/extjs_json_collection_data.html",
@@ -640,7 +617,7 @@
 							},
 							success: function (data, textStatus, jqXHR) {
 
-								$('#find-org-block').text('')
+								$('#find-org-module').text('')
 
 								// Проверяем какие элементы уже выбраны .checked-org
 								var already_checked = []
@@ -665,16 +642,16 @@
 
 									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
 
-						    		$('#find-org-block').append(input)					
-						    		$('#find-org-block').append(label)					
+						    		$('#find-org-module').append(input)					
+						    		$('#find-org-module').append(label)					
 								}
 
 								// После добавления всех checkbox
-					    		$('#find-org-block').append(button)		
+					    		$('#find-org-module').append(button)		
 					    						
 
 					    		$('#org-search').click(function() {	
-				    				$('#block').css({'z-index': 0});
+				    				$('#shade-module').css({'z-index': 0});
 
 				    				// Очищаем выбранные подразделения
 					    			$('.checked-division').remove()
@@ -696,7 +673,7 @@
 
 				    				// Если есть checked - прорисовываем
 				    				if (checked.length > 0) {
-				    					// Вставляем выбранные элементы после #search-block__org
+				    					// Вставляем выбранные элементы после #search-module__org
 
 				    					// Очищаем от старых значений
 										$('.checked-org').remove()
@@ -708,10 +685,8 @@
 								    		var td = $('<td></td>')
 								    		var button = $('<button class="remove_checked_org">X</button>')
 								    		button.click(function() {
-
 				    							// Очищаем выбранные подразделения
-					    						$('.checked-division').remove()
-								    			
+					    						$('.checked-division').remove()						    			
 								    			// Удаляем блок
 								    			$(this).context.parentNode.parentNode.remove()
 								    		})
@@ -719,23 +694,23 @@
 								    		tr.addClass('checked-org')
 								    		tr.append('<td data-org-id="' + id + '">' + name + '</td>')
 								    		tr.append(td)
-			    							$('#search-block__org').after(tr)			    						
+			    							$('#search-module__org').after(tr)			    						
 				    					}
 				    				}
 
-				    				$('#org-block').hide()
+				    				$('#org-module').hide()
 					    		});
 							}
 						});
 
 						setTimeout(function() {
-			    			$('#org-block').show()
+			    			$('#org-module').show()
 						}, 200);	
 				    });
 
 		       		// Подразделения
 		    		$('#division-button').click(function() {
-		    			 $('#block').css({'z-index': 2});
+		    			 $('#shade-module').css({'z-index': 2});
 
 						var already_checked = []
 
@@ -755,8 +730,8 @@
 							},
 							success: function (data, textStatus, jqXHR) {
 
-								// Обнуляем #find-division-block
-								$('#find-division-block').text('')
+								// Обнуляем #find-division-module
+								$('#find-division-module').text('')
 
 								// Проверяем какие элементы уже выбраны .checked-division
 								var already_checked = []
@@ -779,15 +754,15 @@
 
 									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
 
-						    		$('#find-division-block').append(input)					
-						    		$('#find-division-block').append(label)					
+						    		$('#find-division-module').append(input)					
+						    		$('#find-division-module').append(label)					
 								}
 
 								// После добавления всех checkbox
-					    		$('#find-division-block').append(button)					
+					    		$('#find-division-module').append(button)					
 
 					    		$('#division-search').click(function() {
-					    		 		$('#block').css({'z-index': 0});	    				
+					    		 		$('#shade-module').css({'z-index': 0});	    				
 
 
 					    				var checked = []
@@ -806,7 +781,7 @@
 
 					    				// Если есть checked - прорисовываем
 					    				if (checked.length > 0) {
-					    					// Вставляем выбранные элементы после #search-block__division
+					    					// Вставляем выбранные элементы после #search-module__division
 
 					    					// Очищаем от старых значений
 											$('.checked-division').remove()
@@ -825,26 +800,23 @@
 									    		tr.addClass('checked-division')
 									    		tr.append('<td data-division-id="' + id + '">' + name + '</td>')
 									    		tr.append(td)
-				    							$('#search-block__division').after(tr)			    						
+				    							$('#search-module__division').after(tr)						
 					    					}
 					    				}
-
-					    				$('#division-block').hide()
+					    				$('#division-module').hide()
 					    		});
 
 							}
 						});
-
 						setTimeout(function() {
-			    			$('#division-block').show()
+			    			$('#division-module').show()
 						}, 200);	
-				    });				
+				    });			
 
 				    $('#search').click(search);
 				});
 			</script>
 			<script>
-
 			    // сортировка таблицы
 			    var grid = document.getElementById('filter-table');
 
