@@ -106,7 +106,8 @@ for (elem in data)
 		position: elem.position_name.Value,
 		org: elem.org_name.Value,
 		org_id: elem.org_id.Value,
-		division: elem.position_parent_name.Value
+		division: elem.position_parent_name.Value,
+		division_id: elem.position_parent_id.Value
 	});		
 
 }
