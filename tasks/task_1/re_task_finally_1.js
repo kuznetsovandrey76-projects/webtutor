@@ -1,80 +1,66 @@
-// Создать переменные: 
-// id - string
-// lastname - string
-// firstname - string
-// middlename - string
-// fullname - string
-// position - string
-// org - string
-// division - string
+// Переменные: id, lastname, firstname, middlename, fullname, position, org - id, division - id
 
-// Первоначальное название Позиции
-// old_position - string
-
-// Обновляем ФИО в XML
+// Обновляем данные в XML collaborator
 collaboratorXML = OpenDoc( UrlFromDocID(Int(id)))
 collaboratorXML.TopElem.lastname = lastname
 collaboratorXML.TopElem.firstname = firstname
 collaboratorXML.TopElem.middlename = middlename
-
-collaboratorXML.TopElem.position_parent_name = division
-collaboratorXML.TopElem.org_name = org
 collaboratorXML.Save()
 
-// Если позиции не было
-// ИСПРАВИТЬ
-if (old_position === "") {
+haveThisCollaboratorPosition = ArrayOptFirstElem(XQuery("for $elem in positions where $elem/basic_collaborator_id=" + id + " return $elem"));
 
-	alert(old_position)
+// Была ли у этого сотрудника позиция в XML position
+if (haveThisCollaboratorPosition != undefined) { // Была
+	// Старая должность
+	// alert(haveThisCollaboratorPosition.name.Value)	
 
+	// Новая должность
+	// alert(position)
+	
+	// Обновляем данные в XML position
+	updatePositionXML = OpenDoc( UrlFromDocID(haveThisCollaboratorPosition.id.Value));
+	updatePositionXML.TopElem.org_id = org
+	updatePositionXML.TopElem.parent_object_id = division
+	updatePositionXML.TopElem.name = position;
+	updatePositionXML.TopElem.basic_collaborator_id = id;
+
+	updatePositionXML.Save();
+
+	collaboratorXML = OpenDoc( UrlFromDocID(Int(id)))
+	collaboratorXML.TopElem.position_id = Int(haveThisCollaboratorPosition.id.Value)
+	collaboratorXML.Save()
+
+} else { // Не была	
+	// На сервере создается новая должность в указанном подразделении и организации
 	newPositionXML = OpenNewDoc( 'x-local://wtv/wtv_position.xmd');
-	newPositionXML.TopElem.name = position;
-	newPositionXML.TopElem.org_id = Int(ArrayOptFirstElem(XQuery("for $elem in orgs where $elem/name='" + org + "' return $elem")).id.Value);
-	newPositionXML.TopElem.parent_object_id = Int(ArrayOptFirstElem(XQuery("for $elem in subdivisions where $elem/name='" + division + "' return $elem")).id.Value);
+
+	// Указано ли Подразделение save
+	if (division) {
+		newPositionXML.TopElem.parent_object_id = Int(division);
+	}
+	// Указана ли Организация save
+	if (org) {
+		newPositionXML.TopElem.org_id = Int(org);	
+	}
+	// Указано ли Должность save
+	if(position) {
+		newPositionXML.TopElem.name = position
+	}
+	
 	newPositionXML.TopElem.basic_collaborator_id  = Int(id);
-	// newPositionXML.TopElem.basic_collaborator_fullname = fullname;
 	newPositionXML.BindToDb();		
 	newPositionXML.Save();
-
-	// Изменяем значение в XML сотрудника и XML должности
-	collaboratorXML = OpenDoc( UrlFromDocID(Int(id)))
-	collaboratorXML.TopElem.position_name = position
-	collaboratorXML.TopElem.position_id = Int(ArrayOptFirstElem(XQuery("for $elem in positions where $elem/name='" + position + "' return $elem")).id.Value);
-	collaboratorXML.Save();
-} else 
-// Позиция изменена
-if (old_position !== position) {
-
-	// Изменяем значение в XML сотрудника и XML должности
-	collaboratorXML = OpenDoc( UrlFromDocID(Int(id)))
-	collaboratorXML.TopElem.position_name = position
-	collaboratorXML.Save();
-
-	// Забираю предыдущий id позиции
-	position_id = collaboratorXML.TopElem.position_id
-	positionXML =  OpenDoc( UrlFromDocID(Int(position_id)))
-	positionXML.TopElem.name = position
-	// Берем id организации из выборки
-	positionXML.TopElem.org_id = Int(ArrayOptFirstElem(XQuery("for $elem in orgs where $elem/name='" + org + "' return $elem")).id.Value);
-	positionXML.TopElem.parent_object_id = Int(ArrayOptFirstElem(XQuery("for $elem in subdivisions where $elem/name='" + division + "' return $elem")).id.Value);
-	positionXML.TopElem.name = position
-
-	positionXML.Save();
 }
 
-// По id заходим в карточку сотрудника
-__item = ArrayOptFirstElem(XQuery("for $elem in collaborators where $elem/id=" + id + " return $elem"));
-
-// Изменения в карточке сотрудника, Если должность указана
-if (__item != undefined)
-{
-	// Обновляем данные в карточке сотрудника
-	__item.position_name = position
-	__item.fullname = fullname
-	__item.org_name = org
-	__item.org_id = Int(ArrayOptFirstElem(XQuery("for $elem in orgs where $elem/name='" + org + "' return $elem")).id.Value);
-	// Основное подразделение
-	__item.position_parent_name = division
-	__item.position_parent_id = Int(ArrayOptFirstElem(XQuery("for $elem in subdivisions  where $elem/name='" + division + "' return $elem")).id.Value);
+collaboratorXML = OpenDoc( UrlFromDocID(Int(id)))
+// Указано ли Подразделение save
+if (division) {
+	collaboratorXML.TopElem.position_parent_id = Int(division)
 }
+// Указана ли Организация save
+if (org) {
+	collaboratorXML.TopElem.org_id = Int(org)	
+}
+collaboratorXML.Save()
+
 MESSAGE = "Cохранение прошло успешно";
