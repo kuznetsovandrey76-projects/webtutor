@@ -125,6 +125,7 @@
     <input type="hidden" name="org" id="excel_org" value="" />
     <input type="hidden" name="division" id="excel_division" value="" />
 </form>	
+<div id="temp"></div>
 <script>
 	$( document ).ready(function() {
 		// Поиск результатов
@@ -141,12 +142,25 @@
     		$.each( $('[data-division-id]'), function(key, value) {
     			divisions.push($(this).data('divisionId'))
     		})
-
     		// Заполнение формы для EXCEL
 			$("#excel_fullname").val(fullname); // ? если не заполнено 
 			$("#excel_position").val(position);
 			$("#excel_org").val(orgs.toString());
 			$("#excel_division").val(divisions.toString());
+
+			// Определяем общее количество элементов в выборке
+			$.ajax({
+				type: "POST",
+				url: "/pp/Ext/extjs_json_collection_data.html",
+				dataType: "json",
+				data: {
+					collection_code: "rc_task_finally",
+					parameters: "fullname=" + fullname + ";position=" + position + ";org=" + orgs.toString() + ";division=" + divisions.toString()
+				},
+				success: function (data, textStatus, jqXHR) {
+					$('#temp').text(data.results.length);
+				}
+			});
 
 	    	// Обращение к выборке
 			$.ajax({
@@ -156,11 +170,14 @@
 				data: {
 					collection_code: "rc_task_finally",
 					parameters: "fullname=" + fullname + ";position=" + position + ";org=" + orgs.toString() + ";division=" + divisions.toString(),
+					// C какого элемента начать, начиная с 0
 					start: 0,
-					limit: 3
+					// Количество выведенных на экран
+					limit: 1
 				},
 				success: function (data, textStatus, jqXHR) {
 					// Прорисовка таблицы =====================
+					// console.log(data.results.length)
 					for (elem in data.results) {
 					    var tr = $('<tr></tr>')
 					    tr.addClass('table-data')
@@ -193,14 +210,12 @@
 			// Обработка ajax
 			setTimeout(function() {
 				$('#result').show()
-
 				// Количество выведенных строк
 				if ($('.table-data').length) {
 					// http://qaru.site/questions/26952/export-dynamic-html-table-to-excel-in-javascript-in-firefox-browser
 					$('#excel').show()
-
 					// !!! 
-					navigator_buttons($('.table-data').length, 3) 
+					navigator_buttons($('#temp').text(), 1) 
 				} else {
 					$('#excel').hide()
 				}
@@ -324,7 +339,6 @@
 						$("<input>")
 							.attr({type: "text", id: "update_" + value })
 							.val($(edit_items).text())
-
 					)*/
 					$(button_text).text('ок');
 				} else {
@@ -680,41 +694,37 @@
     			$('#division-module').show()
 			}, 200);	
 	    });
-
 	    $('#search').click(search);
 	    
 	    // Выгрузка
 	    $('#excel-load').click(function() {
 	    	// Убираем столбец с id 
 	    	// $('.clb-id').remove()
-
 	    	// Создание клиентского Excel, мой вариант 
 	    	// tableToExcel('filter-table', 'W3C Example Table')
-
 	    	// EXCEL
 			$("#excel_form").submit();
 			return false;
-
 	    });
-
 	    function navigator_buttons(number_of_items, items_on_page) {
 	    	$('#navigator').text('')
 	    	var number_of_pages = Math.ceil(number_of_items / items_on_page)
-
-	    	for(var i = 1, max = number_of_pages; i < max; i++) {
+	    	console.log(number_of_items)
+	    	for(var i = 1, max = number_of_pages; i <= max; i++) {
 					var button = $('<button id="navigator-page-' + i + '">' + i + '</button>')
+						.addClass("navigator-button");
 					if (i === 1) {
 						button.addClass("current-page")
 					}
 					if (i > 5) {
 			    		var forward = $('<button id="forward">Вперед</button>')
+			    			.addClass("navigator-button");
 						$('#navigator').append(forward)
 						break;
 					}
 					$('#navigator').append(button)	    		
 	    	}
 	    }
-
 	});
 </script>
 
@@ -796,6 +806,14 @@
 		margin: 10px auto;
 		background: white;
 		text-align: center;
+		position: relative;
+		z-index: 1;
+	}
+	.navigator-button {
+		margin: 0 3px;
+	}
+	.current-page {
+		background: lightgreen;
 	}
 	.org-module,
 	.division-module,
