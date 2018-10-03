@@ -1,872 +1,864 @@
-<!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="UTF-8">
-			<title>Task_1</title>
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-			<style>	
-				.search-module {
-					width: 80%;
-					margin: 0 auto;
-					background: lightblue;
-					border: 1px solid black;
-					position: relative;
-					z-index: 1;
-					padding: 5px;
-				}
+<!-- SEARCH -->
+<div id="search-module" class="search-module">
+	<table>
+		<tr>
+			<td><label for="fullname">ФИО:</label>	</td>
+			<td><input class="input-field" id="fullname" type="text"></td>
+		</tr>
+		<tr>
+			<td><label for="position">Должность:</label></td>
+			<td><input class="input-field" id="position" type="text"></td>
+		</tr>
+		<tr id="search-module__org">
+			<td><label for="org">Организация:</label></td>
+			<td><input class="input-field" id="org-button" type="button" value="Выбрать"></td>
+		</tr>
+		<tr id="search-module__division">
+			<td><label for="division">Подразделение:</label></td>
+			<td><input class="input-field" id="division-button" type="button" value="Выбрать"></td>
+		</tr>
+		<tr>
+			<td><button id="search" class="search-and-excel">Найти</button></td>
+			<td id="excel"><button id="excel-load" class="search-and-excel">Excel</button></td>
+		</tr>
+	</table>
+</div>
+<!-- ORG -->
+<div id="org-module" class="org-module">
+	<div id="find-org-module">
+	</div>
+</div>
+<!-- DIVISION -->
+<div id="division-module" class="division-module">	
+	<div id="find-division-module">
+	</div>		
+</div>
+<!-- RESULT -->
+<div id="result" class="result">
+	<table id="filter-table">
+	  <thead>				  	
+	    <tr>
+	        <th class="clb-id" data-type="number">id</th>
+	        <th data-type="string">ФИО</th>
+	        <th data-type="string">Должность</th>
+	        <th data-type="string">Организация</th>
+	        <th data-type="string">Подразделение</th>
+	    </tr>
+	  </thead>
+	  <tbody id="tbody"></tbody>
+	</table>
+</div>
+<!-- NAVIGATOR -->
+<div id="navigator" class="navigator">
+<!-- 	<button>Назад</button>
+	<button>1</button>
+	<button>2</button>
+	<button>3</button>
+	<button>4</button>
+	<button>5</button>
+	<button>Вперед</button> -->
+</div>
+<!-- MODAL -->
+<div id="clb-info" class="clb-info">
+	<table class="clb-info__table">
+		<tr>
+			<td id="clb-info__table--id"></td>
+		</tr>
+		<tr>
+			<td>Фамилия:</td>
+			<td id="clb-info__table--lastname"></td>
+			<td><button id="edit-clb-info__table--lastname">Редактировать</button></td>
+		</tr>
+		<tr>
+			<td>Имя:</td>
+			<td id="clb-info__table--firstname"></td>
+			<td><button id="edit-clb-info__table--firstname">Редактировать</button></td>
+		</tr>
+		<tr>
+			<td>Отчество:</td>
+			<td id="clb-info__table--middlename"></td>
+			<td><button id="edit-clb-info__table--middlename">Редактировать</button></td>
+		</tr>
+		<tr>
+			<td>Должность:</td>
+			<td id="clb-info__table--position"></td>
+			<td><button id="edit-clb-info__table--position">Редактировать</button></td>
+		</tr>
+		<tr>
+			<td>Организация:</td>
+			<td id="clb-info__table--org"></td>
+			<td><button id="edit-clb-info__table--org">Редактировать</button></td>
+		</tr>
+		<tr>
+			<td>Подразделение:</td>
+			<td id="clb-info__table--division"></td>
+			<td><button id="edit-clb-info__table--division">Редактировать</button></td>
+		</tr>
+		<tr>
+			<td id="clb-info__table--org--id"></td>
+		</tr>
+		<tr>
+			<td id="clb-info__table--division--id"></td>
+		</tr>
+		<tr>
+			<td><button id="clb-save">Сохранить</button></td>
+			<td></td>
+		</tr>
+	</table>
+</div>
+<!-- MODAL select ORG -->
+<div id="clb-update-org" class="clb-update-org">
+	<div id="select-clb-update-org">
+	</div>
+</div>
+<!-- MODAL select DIVISION -->
+<div id="clb-update-division" class="clb-update-division">
+	<div id="select-clb-update-division">
+	</div>
+</div>
+<div id="shade-module" class="shade-module"></div>
+<!-- EXCEL -->
+<!-- где custom_web_template.html?object_code=<название шаблона> -->
+<form id="excel_form" action="custom_web_template.html?object_code=search_excel" method="post">
+	<input type="hidden" name="fullname" id="excel_fullname" value="" />
+	<input type="hidden" name="position" id="excel_position" value="" />
+    <input type="hidden" name="org" id="excel_org" value="" />
+    <input type="hidden" name="division" id="excel_division" value="" />
+</form>	
+<script>
+	$( document ).ready(function() {
+		// Поиск результатов
+		var search = function() {
+			$('.table-data').remove()
+	    	// Введенные значения
+    		var fullname = $('#fullname').val()
+    		var position = $('#position').val()
+    		var orgs = []
+    		$.each( $('[data-org-id]'), function(key, value) {
+    			orgs.push($(this).data('orgId'))
+    		})
+    		var divisions = []
+    		$.each( $('[data-division-id]'), function(key, value) {
+    			divisions.push($(this).data('divisionId'))
+    		})
 
-				.org-module,
-				.division-module,
-				.clb-info {
-					background: khaki;
-					border: 1px solid black;
-					position: absolute;
-					top: 80px;	
-					left: 160px;
-					z-index: 5;
-					width: 80%;
-					padding: 5px;
-				}
-				.clb {
-					cursor: pointer;
-				}
-				.result {
-					width: 80%;
-					margin: 10px auto;
-					position: relative;
-					z-index: 1;
-					background: white;
-				}
-				.clb-info__table td{
-					width: 40%;
-				}
-				.clb-id,
-				#clb-info__table--id {
-					display: none;
-				}
-				
-				.clb-update-org,
-				.clb-update-division {
-					background: lightgreen;
-					border: 1px solid black;
-					position: absolute;
-					top: 80px;	
-					left: 160px;
-					z-index: 20;
-					width: 40%;
-					padding: 5px;
-				}
-				.shade-module {
-					background: rgba(123, 123, 43, .3);
-					position: absolute;
-					width: 100%;
-					height: 100%;
-					z-index: 0;
-					top: 0;
-					left: 0;
-				}
+    		// Заполнение формы для EXCEL
+			$("#excel_fullname").val(fullname); // ? если не заполнено 
+			$("#excel_position").val(position);
+			$("#excel_org").val(orgs.toString());
+			$("#excel_division").val(divisions.toString());
 
-				/* ДОП */
-			    #filter-table{
-			        width: 100%;
-			    }
-			    #filter-table th{
-			        background-color: #dadada;
-			    }
-			    #filter-table td, #filter-table th{
-			        padding: 5px;
-			        border-bottom: 1px solid #ccc;
-			    }
-			    th {
-			    	cursor: pointer;
-			    }
-			</style>
-		</head>
-		<body>	
-
-			<!-- SEARCH -->
-			<div id="search-module" class="search-module">
-				<table>
-					<tr>
-						<td><label for="fullname">ФИО:</label>	</td>
-						<td><input class="input-field" id="fullname" type="text"></td>
-					</tr>
-					<tr>
-						<td><label for="position">Должность:</label></td>
-						<td><input class="input-field" id="position" type="text"></td>
-					</tr>
-					<tr id="search-module__org">
-						<td><label for="org">Организация:</label></td>
-						<td><input class="input-field" id="org-button" type="button" value="Выбрать"></td>
-					</tr>
-					<tr id="search-module__division">
-						<td><label for="division">Подразделение:</label></td>
-						<td><input class="input-field" id="division-button" type="button" value="Выбрать"></td>
-					</tr>
-					<tr>
-						<td><button id="search">Найти</button></td>
-						<td></td>
-					</tr>
-				</table>
-			</div>
-			<!-- ORG -->
-			<div id="org-module" class="org-module">
-				<div id="find-org-module">
-				</div>
-			</div>
-			<!-- DIVISION -->
-			<div id="division-module" class="division-module">	
-				<div id="find-division-module">
-				</div>		
-			</div>
-			<!-- RESULT -->
-			<div id="result" class="result">
-				<table id="filter-table">
-				  <thead>				  	
-				    <tr>
-				        <th class="clb-id" data-type="number">id</th>
-				        <th data-type="string">ФИО</th>
-				        <th data-type="string">Должность</th>
-				        <th data-type="string">Организация</th>
-				        <th data-type="string">Подразделение</th>
-				    </tr>
-				  </thead>
-				  <tbody id="tbody"></tbody>
-				</table>
-			</div>
-			<!-- MODAL -->
-			<div id="clb-info" class="clb-info">
-				<table class="clb-info__table">
-					<tr>
-						<td id="clb-info__table--id"></td>
-					</tr>
-					<tr>
-						<td>Фамилия:</td>
-						<td id="clb-info__table--lastname"></td>
-						<td><button id="edit-clb-info__table--lastname">Редактировать</button></td>
-					</tr>
-					<tr>
-						<td>Имя:</td>
-						<td id="clb-info__table--firstname"></td>
-						<td><button id="edit-clb-info__table--firstname">Редактировать</button></td>
-					</tr>
-					<tr>
-						<td>Отчество:</td>
-						<td id="clb-info__table--middlename"></td>
-						<td><button id="edit-clb-info__table--middlename">Редактировать</button></td>
-					</tr>
-					<tr>
-						<td>Должность:</td>
-						<td id="clb-info__table--position"></td>
-						<td><button id="edit-clb-info__table--position">Редактировать</button></td>
-					</tr>
-					<tr>
-						<td>Организация:</td>
-						<td id="clb-info__table--org"></td>
-						<td><button id="edit-clb-info__table--org">Редактировать</button></td>
-					</tr>
-					<tr>
-						<td>Подразделение:</td>
-						<td id="clb-info__table--division"></td>
-						<td><button id="edit-clb-info__table--division">Редактировать</button></td>
-					</tr>
-					<tr>
-						<td id="clb-info__table--org--id"></td>
-					</tr>
-					<tr>
-						<td id="clb-info__table--division--id"></td>
-					</tr>
-					<tr>
-						<td><button id="clb-save">Сохранить</button></td>
-						<td></td>
-					</tr>
-				</table>
-			</div>
-			<!-- MODAL select ORG -->
-			<div id="clb-update-org" class="clb-update-org">
-				<div id="select-clb-update-org">
-				</div>
-			</div>
-			<!-- MODAL select DIVISION -->
-			<div id="clb-update-division" class="clb-update-division">
-				<div id="select-clb-update-division">
-				</div>
-			</div>
-			<div id="shade-module" class="shade-module"></div>
-			<script>
-				$( document ).ready(function() {
-					// Поиск результатов
-					var search = function() {
-						$('.table-data').remove()
-				    	// Введенные значения
-			    		var fullname = $('#fullname').val()
-			    		var position = $('#position').val()
-			    		var orgs = []
-			    		$.each( $('[data-org-id]'), function(key, value) {
-			    			orgs.push($(this).data('orgId'))
-			    		})
-			    		var divisions = []
-			    		$.each( $('[data-division-id]'), function(key, value) {
-			    			divisions.push($(this).data('divisionId'))
-			    		})
-				    	// Обращение к выборке
-						$.ajax({
-							type: "POST",
-							url: "/pp/Ext/extjs_json_collection_data.html",
-							dataType: "json",
-							data: {
-								collection_code: "rc_task_finally",
-								parameters: "fullname=" + fullname + ";position=" + position +
-											";org=" + orgs.toString() + ";division=" + divisions.toString()
-							},
-							success: function (data, textStatus, jqXHR) {
-
-								// Прорисовка таблицы =====================
-								for (elem in data.results) {
-								    var tr = $('<tr></tr>')
-								    tr.addClass('table-data')
-
-								    for(var i = 0; i < 5; i++) {
-								    	var td = $('<td></td>')
-
-								    	if (i === 0) {
-								    		td.addClass('clb-id')
-								    		td.attr('id', data.results[elem].id )
-								    		td.text(data.results[elem].id)
-
-								    	} else if (i === 1) {
-								    		td.addClass('clb')
-								    		td.text(data.results[elem].fullname)
-								    	} else if (i === 2) {
-								    		td.text(data.results[elem].position)
-								    	} else if (i === 3) {
-								    		td.text(data.results[elem].org)
-								    		td.attr("data-info-org-id", data.results[elem].org_id || "");
-
-								    	} else if (i === 4) {
-								    		td.text(data.results[elem].division)
-								    		td.attr("data-info-division-id", data.results[elem].division_id || "");
-								    	}		 			
-								    	
-								    	tr.append(td)
-								    }		
-
-						    		// $('#filter-table').append(tr)					
-						    		$('#tbody').append(tr)					
-								}
-							}
-						});
-
-						// Обработка ajax
-						setTimeout(function() {
-							$('#result').show()
-						}, 200);
+	    	// Обращение к выборке
+			$.ajax({
+				type: "POST",
+				url: "/pp/Ext/extjs_json_collection_data.html",
+				dataType: "json",
+				data: {
+					collection_code: "rc_task_finally",
+					parameters: "fullname=" + fullname + ";position=" + position + ";org=" + orgs.toString() + ";division=" + divisions.toString(),
+					start: 0,
+					limit: 3
+				},
+				success: function (data, textStatus, jqXHR) {
+					// Прорисовка таблицы =====================
+					for (elem in data.results) {
+					    var tr = $('<tr></tr>')
+					    tr.addClass('table-data')
+					    for(var i = 0; i < 5; i++) {
+					    	var td = $('<td></td>')
+					    	if (i === 0) {
+					    		td.addClass('clb-id')
+					    			.attr('id', data.results[elem].id )
+					    			.text(data.results[elem].id)
+					    	} else if (i === 1) {
+					    		td.addClass('clb')
+					    		td.text(data.results[elem].fullname)
+					    	} else if (i === 2) {
+					    		td.text(data.results[elem].position)
+					    	} else if (i === 3) {
+					    		td.text(data.results[elem].org)
+					    		td.attr("data-info-org-id", data.results[elem].org_id || "");
+					    	} else if (i === 4) {
+					    		td.text(data.results[elem].division)
+					    		td.attr("data-info-division-id", data.results[elem].division_id || "");
+					    	}		 			
+					    	
+					    	tr.append(td)
+					    }		
+			    		// $('#filter-table').append(tr)					
+			    		$('#tbody').append(tr)					
 					}
+				}
+			});
+			// Обработка ajax
+			setTimeout(function() {
+				$('#result').show()
 
-					// Для удаленного действия
-					remoteAction = function (actionObject) {
-						try {
-							if (remoteAction != undefined) {
-								var returnObject = {};
-								var soapRequestBody;
-								var soapServerUrl = actionObject.url != undefined ? actionObject.url : '/remote_actions_wsdl.xml';
-								var soapFormat = actionObject.format != undefined ? actionObject.format : 'json';
+				// Количество выведенных строк
+				if ($('.table-data').length) {
+					// http://qaru.site/questions/26952/export-dynamic-html-table-to-excel-in-javascript-in-firefox-browser
+					$('#excel').show()
 
-								soapRequestBody  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-								soapRequestBody += "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">";
-								soapRequestBody += "<soap:Body>";
-								soapRequestBody += "<" + actionObject.name + " xmlns=\"http://www.websoft.ru/\">";
-								soapRequestBody += "<format>" + soapFormat + "</format>";
-								if (actionObject.options != undefined) {
-									for (var i = 0; i < actionObject.options.length; i++) {
-										soapRequestBody += "<" + actionObject.options[i].name + ">" + actionObject.options[i].value + "</" + actionObject.options[i].name + ">";
-									}
-								}
-								soapRequestBody += "</" + actionObject.name + ">";
-								soapRequestBody += "</soap:Body>";
-								soapRequestBody += "</soap:Envelope>";
-
-								$.ajax({
-									type: "POST",
-									url: soapServerUrl,
-									contentType: "text/xml",
-									dataType: "xml",
-									data: soapRequestBody,
-									success: processSuccess,
-									error: processError
-								});
-
-								function processSuccess (data, status, req) {
-									if (status == "success") {
-										var returnObject = {
-											error: data.getElementsByTagName('error')[0].firstChild,
-											type: data.getElementsByTagName('type')[0].firstChild,
-											messageText: data.getElementsByTagName('messageText')[0].firstChild,
-											result: data.getElementsByTagName('result')[0].firstChild
-										};
-										try{
-											returnObject.error = returnObject.error.nodeValue;
-										}
-										catch(_ex){}
-										try{
-											returnObject.type = returnObject.type.nodeValue;
-										}
-										catch(_ex){}
-										try{
-											returnObject.messageText = returnObject.messageText.nodeValue;
-										}
-										catch(_ex){}
-										try{
-											returnObject.result = returnObject.result.nodeValue;
-										}
-										catch(_ex){}
-
-										if (actionObject.callback_f != undefined) {
-											actionObject.callback_f(returnObject);
-										}
-
-										return returnObject;
-									}
-									else {
-										throw status;
-									}
-								}
-
-								function processError(data, status, req) {
-									throw req.responseText;
-								}
-							}
-							else
-							{
-								throw '00'
-							}
+					// !!! 
+					navigator_buttons($('.table-data').length, 3) 
+				} else {
+					$('#excel').hide()
+				}
+			}, 200);
+		}
+		// Для удаленного действия
+		remoteAction = function (actionObject) {
+			try {
+				if (remoteAction != undefined) {
+					var returnObject = {};
+					var soapRequestBody;
+					var soapServerUrl = actionObject.url != undefined ? actionObject.url : '/remote_actions_wsdl.xml';
+					var soapFormat = actionObject.format != undefined ? actionObject.format : 'json';
+					soapRequestBody  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+					soapRequestBody += "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">";
+					soapRequestBody += "<soap:Body>";
+					soapRequestBody += "<" + actionObject.name + " xmlns=\"http://www.websoft.ru/\">";
+					soapRequestBody += "<format>" + soapFormat + "</format>";
+					if (actionObject.options != undefined) {
+						for (var i = 0; i < actionObject.options.length; i++) {
+							soapRequestBody += "<" + actionObject.options[i].name + ">" + actionObject.options[i].value + "</" + actionObject.options[i].name + ">";
 						}
-						catch(_exeption) {
-							returnObject = {error: 1, messageText: _exeption};
-							if (typeof(actionObject.callback_f) != 'undefined') {
+					}
+					soapRequestBody += "</" + actionObject.name + ">";
+					soapRequestBody += "</soap:Body>";
+					soapRequestBody += "</soap:Envelope>";
+					$.ajax({
+						type: "POST",
+						url: soapServerUrl,
+						contentType: "text/xml",
+						dataType: "xml",
+						data: soapRequestBody,
+						success: processSuccess,
+						error: processError
+					});
+					function processSuccess (data, status, req) {
+						if (status == "success") {
+							var returnObject = {
+								error: data.getElementsByTagName('error')[0].firstChild,
+								type: data.getElementsByTagName('type')[0].firstChild,
+								messageText: data.getElementsByTagName('messageText')[0].firstChild,
+								result: data.getElementsByTagName('result')[0].firstChild
+							};
+							try{
+								returnObject.error = returnObject.error.nodeValue;
+							}
+							catch(_ex){}
+							try{
+								returnObject.type = returnObject.type.nodeValue;
+							}
+							catch(_ex){}
+							try{
+								returnObject.messageText = returnObject.messageText.nodeValue;
+							}
+							catch(_ex){}
+							try{
+								returnObject.result = returnObject.result.nodeValue;
+							}
+							catch(_ex){}
+							if (actionObject.callback_f != undefined) {
 								actionObject.callback_f(returnObject);
 							}
-							return returnObject ;
+							return returnObject;
 						}
-					};
+						else {
+							throw status;
+						}
+					}
+					function processError(data, status, req) {
+						throw req.responseText;
+					}
+				}
+				else
+				{
+					throw '00'
+				}
+			}
+			catch(_exeption) {
+				returnObject = {error: 1, messageText: _exeption};
+				if (typeof(actionObject.callback_f) != 'undefined') {
+					actionObject.callback_f(returnObject);
+				}
+				return returnObject ;
+			}
+		};
+		$(document).on('click', '.clb', function () {
+			$('#shade-module').css({'z-index': 2});
+				var select_item = $(this).context.parentNode.children;
+				// Получаем id выбранного элемента
+				var fullname = $(select_item[1]).text().split(' ');
+				var user = {
+					id: $(select_item[0]).text(),
+					lastname: fullname[0],
+					firstname: fullname[1],
+					middlename: fullname[2],
+					position: $(select_item[2]).text(),
+					org: $(select_item[3]).text(),
+					org_id: $(select_item[3]).data('infoOrgId'),
+					division: $(select_item[4]).text(),
+					division_id: $(select_item[4]).data('infoDivisionId'),
+				}
+				$('#clb-info').show()
+				$('#clb-info__table--id').text(user.id)
+				$('#clb-info__table--lastname').text(user.lastname)
+				$('#clb-info__table--firstname').text(user.firstname)
+				$('#clb-info__table--middlename').text(user.middlename)
+				$('#clb-info__table--position').text(user.position)
+				$('#clb-info__table--org').text(user.org)
+				$('#clb-info__table--org--id').text(user.org_id)
+				$('#clb-info__table--division').text(user.division)
+				$('#clb-info__table--division--id').text(user.division_id)
+		});
+		// + EDIT FULLNAME 
+		$.each(['lastname', 'firstname', 'middlename'], function(index, value) {
+			$('#edit-clb-info__table--' + value + '').click(function() {
+				var button_text = $('#edit-clb-info__table--' + value + '')
+				var edit_items = $('#clb-info__table--' + value + '')
+				if ( button_text.text() === 'Редактировать' ) {
+					$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_' + value + '"></input>')
+					/*$(edit_items).append(
+						$("<input>")
+							.attr({type: "text", id: "update_" + value })
+							.val($(edit_items).text())
 
-					$(document).on('click', '.clb', function () {
+					)*/
+					$(button_text).text('ок');
+				} else {
+					$(button_text).text('Редактировать')
+					$(edit_items).text($('#update_' + value + '').val())
+				}
+			});						
+		})
+		$('#edit-clb-info__table--position').click(function() {
+			var button_text = $('#edit-clb-info__table--position')
+			var edit_items = $('#clb-info__table--position')
+			// Заполнение новой позиции
+			if ( edit_items.text() === '' ) {
+				// Если у сотрудника не указана должность, то поле доступно для редактирования только после заполнения фильтров организации и подразделения. 	
+				if ($('#clb-info__table--org').text() === '' || $('#clb-info__table--division').text() === '') {
+					alert('Выберите организацию и подразделение')
+				} else {
+				if ( button_text.text() === 'Редактировать' ) {
+					$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_position"></input>')
+					$(button_text).text('ок')
+				} else {
+					$(button_text).text('Редактировать')
+					$(edit_items).text($('#update_position').val())
+				}
+				}
+			// Изменение существующей позиции
+			} else {
+				if ( button_text.text() === 'Редактировать' ) {
+					$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_position"></input>')
+					$(button_text).text('ок')
+				} else {
+					$(button_text).text('Редактировать')
+					$(edit_items).text($('#update_position').val())
+				}
+			}
+		});
+		// РЕДАКТОР ОРГАНИЗАЦИИ
+		$('#edit-clb-info__table--org').click(function() {
+			$('#shade-module').css({'z-index': 6});
+			$('#clb-update-org').show()
+			$.ajax({
+				type: "POST",
+				url: "/pp/Ext/extjs_json_collection_data.html",
+				dataType: "json",
+				data: {
+					collection_code: "rc_task_finally_org",
+					parameters: ''
+				},
+				success: function (data, textStatus, jqXHR) {
+					// Обнуляем 
+					$('#select-clb-update-org').text('')
+					// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+					var button = $('<button id="update-org-search">Выбрать</button>')
+					button.click(function() {
 						$('#shade-module').css({'z-index': 2});
-							var select_item = $(this).context.parentNode.children;
-
-							// Получаем id выбранного элемента
-							var fullname = $(select_item[1]).text().split(' ');
-
-							var user = {
-								id: $(select_item[0]).text(),
-								lastname: fullname[0],
-								firstname: fullname[1],
-								middlename: fullname[2],
-								position: $(select_item[2]).text(),
-								org: $(select_item[3]).text(),
-								org_id: $(select_item[3]).data('infoOrgId'),
-								division: $(select_item[4]).text(),
-								division_id: $(select_item[4]).data('infoDivisionId'),
-							}
-
-
-							$('#clb-info').show()
-
-							$('#clb-info__table--id').text(user.id)
-							$('#clb-info__table--lastname').text(user.lastname)
-							$('#clb-info__table--firstname').text(user.firstname)
-							$('#clb-info__table--middlename').text(user.middlename)
-							$('#clb-info__table--position').text(user.position)
-							$('#clb-info__table--org').text(user.org)
-							$('#clb-info__table--org--id').text(user.org_id)
-							$('#clb-info__table--division').text(user.division)
-							$('#clb-info__table--division--id').text(user.division_id)
-					});
-
-
-					// + EDIT FULLNAME 
-					$.each(['lastname', 'firstname', 'middlename'], function(index, value) {
-						$('#edit-clb-info__table--' + value + '').click(function() {
-							var button_text = $('#edit-clb-info__table--' + value + '')
-							var edit_items = $('#clb-info__table--' + value + '')
-							if ( button_text.text() === 'Редактировать' ) {
-								$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_' + value + '"></input>')
-								$(button_text).text('ок')
-							} else {
-								$(button_text).text('Редактировать')
-								$(edit_items).text($('#update_' + value + '').val())
-							}
-						});						
+	    				var org_search_DOM = $(this).context.parentNode.children
+	    				for (var i = 0, max = org_search_DOM.length; i < max; i++) {
+	    					if (org_search_DOM[i].checked) {
+	    						$('#clb-info__table--org--id').text(org_search_DOM[i].id)
+	    						$('#clb-info__table--org').text(org_search_DOM[i].value)
+	    					}
+	    				}
+						$('#clb-info__table--division').text('')
+						$('#clb-update-org').hide()
 					})
-
-					$('#edit-clb-info__table--position').click(function() {
-
-						var button_text = $('#edit-clb-info__table--position')
-						var edit_items = $('#clb-info__table--position')
-
-						// Заполнение новой позиции
-						if ( edit_items.text() === '' ) {
-							// Если у сотрудника не указана должность, то поле доступно для редактирования только после заполнения фильтров организации и подразделения. 	
-							if ($('#clb-info__table--org').text() === '' || $('#clb-info__table--division').text() === '') {
-								alert('Выберите организацию и подразделение')
-							} else {
-							if ( button_text.text() === 'Редактировать' ) {
-								$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_position"></input>')
-								$(button_text).text('ок')
-							} else {
-								$(button_text).text('Редактировать')
-								$(edit_items).text($('#update_position').val())
-							}
-							}
-						// Изменение существующей позиции
-						} else {
-							if ( button_text.text() === 'Редактировать' ) {
-								$(edit_items).html('<input type="text" value="' +$(edit_items).text() +'" id="update_position"></input>')
-								$(button_text).text('ок')
-							} else {
-								$(button_text).text('Редактировать')
-								$(edit_items).text($('#update_position').val())
-							}
+					for (elem in data.results) {
+						var id = data.results[elem].id
+						var name = data.results[elem].name
+						var input = $('<input type="radio" name="org" value="' + name + '" id="' + id + '" checked />')
+						var label = $('<label for="' + id + '">"' + name + '"</label><br>')
+			    		$('#select-clb-update-org').append(input)				
+			    		$('#select-clb-update-org').append(label)				
+					}
+					// После добавления всех radio
+		    		$('#select-clb-update-org').append(button)	
+				}
+			});
+		});
+		// РЕДАКТОР ПОДРАЗДЕЛЕНИЙ
+		$('#edit-clb-info__table--division').click(function() {
+			$('#shade-module').css({'z-index': 6});
+			$('#clb-update-division').show()
+			checked = $('#clb-info__table--org--id').text()
+			$.ajax({
+				type: "POST",
+				url: "/pp/Ext/extjs_json_collection_data.html",
+				dataType: "json",
+				data: {
+					collection_code: "rc_task_finally_division",
+					parameters: 'checked=' + checked
+				},
+				success: function (data, textStatus, jqXHR) {
+					// Обнуляем 
+					$('#select-clb-update-division').text('')
+					// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+					var button = $('<button id="update-division-search">Выбрать</button>')
+					button.click(function() {
+						$('#shade-module').css({'z-index': 2});
+						// Заменяем текущую организацию
+						// Очищаем подразделение
+	    				var division_search_DOM = $(this).context.parentNode.children
+	    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
+	    					if (division_search_DOM[i].checked) {
+	    						$('#clb-info__table--division--id').text(division_search_DOM[i].id)
+	    						$('#clb-info__table--division').text(division_search_DOM[i].value)
+	    					}
+	    				}
+						$('#clb-update-division').hide()
+					})
+					for (elem in data.results) {
+						var id = data.results[elem].id
+						var name = data.results[elem].name
+						var input = $('<input type="radio" name="division" value="' + name + '" id="' + id + '" checked />')
+						var label = $('<label for="' + id + '">"' + name + '"</label><br>')
+			    		$('#select-clb-update-division').append(input)			
+			    		$('#select-clb-update-division').append(label)			
+					}
+					// После добавления всех radio
+		    		$('#select-clb-update-division').append(button)	
+				}
+			});
+		});
+		// Сохранение измененных данных
+		$('#clb-save').click(function() {
+			var save_item = $(this).parent().parent().parent().first().children();
+			var info = {
+				id: $('#clb-info__table--id').text(),
+				firstname: $('#clb-info__table--firstname').text(),
+				lastname: $('#clb-info__table--lastname').text(),
+				middlename: $('#clb-info__table--middlename').text(),
+				position: $('#clb-info__table--position').text(),
+				// id
+				org: $('#clb-info__table--org--id').text(),
+				// id
+				division: $('#clb-info__table--division--id').text(),
+				// ок или Редактировать =============================================
+				firstname_button_text: $('#edit-clb-info__table--firstname').text(), 
+				lastname_button_text: $('#edit-clb-info__table--lastname').text(), 
+				middlename_button_text: $('#edit-clb-info__table--middlename').text(), 
+				position_button_text: $('#edit-clb-info__table--position').text() 
+			}
+			if ( info.firstname_button_text === "ок" || info.lastname_button_text === "ок" || info.middlename_button_text === "ок" || info.position_button_text === "ок") {
+				return alert("Подтвердите все изменения")
+			}
+			if ( !Boolean(info.firstname && info.lastname && info.middlename && info.position && info.org && info.division)) {
+				// console.log("Заполнены не все поля")
+			}
+		
+			$('#shade-module').css({'z-index': 0});
+			$('#clb-info').hide()
+			var fullname = info.lastname + ' ' + info.firstname + ' ' + info.middlename 
+			regAction = {
+				name : "re_task_finally_1", //код удаленного действия
+				options: [
+							 { name: "id", value: info.id },
+							 { name: "lastname", value: info.lastname },
+							 { name: "firstname", value: info.firstname },
+							 { name: "middlename", value: info.middlename },
+							 { name: "fullname", value: fullname },
+							 { name: "position", value: info.position},
+							 { name: "org", value: info.org},
+							 { name: "division", value: info.division}
+						 ],
+				callback_f : function(_doc){
+					// waitWindow.hide();
+					if (_doc.error == 0)
+					{
+						// Обновляем таблицу
+						return search();
+					}
+					else
+					{
+						alert("ERR")
+					}
+				}
+			} 
+			// пример коллбэка на ответ, его может не быть, 
+			// _doc - возвращаемый объект, содержит поля error, type, messageText, result
+			remoteAction(regAction);					
+		});
+		// Скрываем блоки выбора 
+		$.each(['org-module', 'division-module', 'result', 'clb-info', 'clb-update-org', 'clb-update-division', 'excel'], function(index, value) {
+			$('#' + value).hide()
+		});
+   		// ВЫБОРКИ ============================
+   		// Организации
+	    $('#org-button').click(function() {
+	    	$('#shade-module').css({'z-index': 2});
+			$.ajax({
+				type: "POST",
+				url: "/pp/Ext/extjs_json_collection_data.html",
+				dataType: "json",
+				data: {
+					collection_code: "rc_task_finally_org",
+					parameters: ''
+				},
+				success: function (data, textStatus, jqXHR) {
+					$('#find-org-module').text('')
+					// Проверяем какие элементы уже выбраны .checked-org
+					var already_checked = []
+					if ($('.checked-org').length) {
+						$.each($('.checked-org'), function(key, value) {
+							already_checked.push($(this).text().slice(0, -1))
+						})
+					} 
+					// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+					var button = $('<button id="org-search">Выбрать</button>')
+					for (elem in data.results) {
+						var id = data.results[elem].id
+						var name = data.results[elem].name
+						var input = $('<input type="checkbox" name="org" value="' + name + '" id="' + id + '" />')
+						if (already_checked.indexOf(name) != -1) {
+							input.prop('checked', true);								
 						}
-					});
-
-					// РЕДАКТОР ОРГАНИЗАЦИИ
-					$('#edit-clb-info__table--org').click(function() {
-						$('#shade-module').css({'z-index': 6});
-
-						$('#clb-update-org').show()
-
-						$.ajax({
-							type: "POST",
-							url: "/pp/Ext/extjs_json_collection_data.html",
-							dataType: "json",
-							data: {
-								collection_code: "rc_task_finally_org",
-								parameters: ''
-							},
-							success: function (data, textStatus, jqXHR) {
-								// Обнуляем 
-								$('#select-clb-update-org').text('')
-
-								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-								var button = $('<button id="update-org-search">Выбрать</button>')
-								button.click(function() {
-									$('#shade-module').css({'z-index': 2});
-
-				    				var org_search_DOM = $(this).context.parentNode.children
-				    				for (var i = 0, max = org_search_DOM.length; i < max; i++) {
-				    					if (org_search_DOM[i].checked) {
-				    						$('#clb-info__table--org--id').text(org_search_DOM[i].id)
-				    						$('#clb-info__table--org').text(org_search_DOM[i].value)
-				    					}
-				    				}
-									$('#clb-info__table--division').text('')
-									$('#clb-update-org').hide()
-								})
-
-								for (elem in data.results) {
-									var id = data.results[elem].id
-									var name = data.results[elem].name
-									var input = $('<input type="radio" name="org" value="' + name + '" id="' + id + '" checked />')
-									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
-
-						    		$('#select-clb-update-org').append(input)				
-						    		$('#select-clb-update-org').append(label)				
-								}
-
-								// После добавления всех radio
-					    		$('#select-clb-update-org').append(button)	
-							}
-						});
-					});
-					// РЕДАКТОР ПОДРАЗДЕЛЕНИЙ
-					$('#edit-clb-info__table--division').click(function() {
-						$('#shade-module').css({'z-index': 6});
-
-						$('#clb-update-division').show()
-
-						checked = $('#clb-info__table--org--id').text()
-
-						$.ajax({
-							type: "POST",
-							url: "/pp/Ext/extjs_json_collection_data.html",
-							dataType: "json",
-							data: {
-								collection_code: "rc_task_finally_division",
-								parameters: 'checked=' + checked
-							},
-							success: function (data, textStatus, jqXHR) {
-								// Обнуляем 
-								$('#select-clb-update-division').text('')
-
-								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-								var button = $('<button id="update-division-search">Выбрать</button>')
-								button.click(function() {
-									$('#shade-module').css({'z-index': 2});
-									// Заменяем текущую организацию
-									// Очищаем подразделение
-				    				var division_search_DOM = $(this).context.parentNode.children
-				    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
-				    					if (division_search_DOM[i].checked) {
-				    						$('#clb-info__table--division--id').text(division_search_DOM[i].id)
-				    						$('#clb-info__table--division').text(division_search_DOM[i].value)
-				    					}
-				    				}
-									$('#clb-update-division').hide()
-								})
-
-								for (elem in data.results) {
-									var id = data.results[elem].id
-									var name = data.results[elem].name
-									var input = $('<input type="radio" name="division" value="' + name + '" id="' + id + '" checked />')
-									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
-
-						    		$('#select-clb-update-division').append(input)			
-						    		$('#select-clb-update-division').append(label)			
-								}
-
-								// После добавления всех radio
-					    		$('#select-clb-update-division').append(button)	
-							}
-						});
-					});
-
-					// Сохранение измененных данных
-					$('#clb-save').click(function() {
-						var save_item = $(this).parent().parent().parent().first().children();
-
-						var info = {
-							id: $('#clb-info__table--id').text(),
-							firstname: $('#clb-info__table--firstname').text(),
-							lastname: $('#clb-info__table--lastname').text(),
-							middlename: $('#clb-info__table--middlename').text(),
-							position: $('#clb-info__table--position').text(),
-							// id
-							org: $('#clb-info__table--org--id').text(),
-							// id
-							division: $('#clb-info__table--division--id').text(),
-
-							// ок или Редактировать =============================================
-							firstname_button_text: $('#edit-clb-info__table--firstname').text(), 
-							lastname_button_text: $('#edit-clb-info__table--lastname').text(), 
-							middlename_button_text: $('#edit-clb-info__table--middlename').text(), 
-							position_button_text: $('#edit-clb-info__table--position').text() 
-						}
-
-						if ( info.firstname_button_text === "ок" || info.lastname_button_text === "ок" || info.middlename_button_text === "ок" || info.position_button_text === "ок") {
-							return alert("Подтвердите все изменения")
-						}
-
-						if ( !Boolean(info.firstname && info.lastname && info.middlename && info.position && info.org && info.division)) {
-							// console.log("Заполнены не все поля")
-						}
-					
-
-						$('#shade-module').css({'z-index': 0});
-						$('#clb-info').hide()
-
-						var fullname = info.lastname + ' ' + info.firstname + ' ' + info.middlename 
-
-						regAction = {
-							name : "re_task_finally_1", //код удаленного действия
-							options: [
-										 { name: "id", value: info.id },
-										 { name: "lastname", value: info.lastname },
-										 { name: "firstname", value: info.firstname },
-										 { name: "middlename", value: info.middlename },
-										 { name: "fullname", value: fullname },
-										 { name: "position", value: info.position},
-										 { name: "org", value: info.org},
-										 { name: "division", value: info.division}
-									 ],
-
-							callback_f : function(_doc){
-								// waitWindow.hide();
-								if (_doc.error == 0)
-								{
-									// Обновляем таблицу
-									return search();
-								}
-								else
-								{
-									alert("ERR")
-								}
-							}
-						} 
-						// пример коллбэка на ответ, его может не быть, 
-						// _doc - возвращаемый объект, содержит поля error, type, messageText, result
-						remoteAction(regAction);					
-					});
-
-					// Скрываем блоки выбора 
-					$.each(['org-module', 'division-module', 'result', 'clb-info', 'clb-update-org', 'clb-update-division'], function(index, value) {
-						$('#' + value).hide()
-					});
-
-		       		// ВЫБОРКИ ============================
-		       		// Организации
-				    $('#org-button').click(function() {
-				    	$('#shade-module').css({'z-index': 2});
-						$.ajax({
-							type: "POST",
-							url: "/pp/Ext/extjs_json_collection_data.html",
-							dataType: "json",
-							data: {
-								collection_code: "rc_task_finally_org",
-								parameters: ''
-							},
-							success: function (data, textStatus, jqXHR) {
-
-								$('#find-org-module').text('')
-
-								// Проверяем какие элементы уже выбраны .checked-org
-								var already_checked = []
-
-								if ($('.checked-org').length) {
-									$.each($('.checked-org'), function(key, value) {
-										already_checked.push($(this).text().slice(0, -1))
-									})
-								} 
-
-								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-								var button = $('<button id="org-search">Выбрать</button>')
-
-								for (elem in data.results) {
-									var id = data.results[elem].id
-									var name = data.results[elem].name
-									var input = $('<input type="checkbox" name="org" value="' + name + '" id="' + id + '" />')
-
-									if (already_checked.indexOf(name) != -1) {
-										input.prop('checked', true);								
-									}
-
-									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
-
-						    		$('#find-org-module').append(input)					
-						    		$('#find-org-module').append(label)					
-								}
-
-								// После добавления всех checkbox
-					    		$('#find-org-module').append(button)		
-					    						
-
-					    		$('#org-search').click(function() {	
-				    				$('#shade-module').css({'z-index': 0});
-
-				    				// Очищаем выбранные подразделения
-					    			$('.checked-division').remove()
-
-				    				// Выбранные элементы
-				    				var checked = []
-
-				    				$.each($('[name="org"]'), function() {
-				    					if ($(this).context.checked) {
-											checked.push({
-				    							id: $(this).context.id,
-				    							name: $(this).context.value
-				    						})
-				    					}
-				    				})
-
-				    				// Массив из объектов выбранных элементов 
-				    				// {id: "6537284716620812580", name: "Yandex"}
-
-				    				// Если есть checked - прорисовываем
-				    				if (checked.length > 0) {
-				    					// Вставляем выбранные элементы после #search-module__org
-
-				    					// Очищаем от старых значений
-										$('.checked-org').remove()
-				    					
-				    					for (elem in checked) {
-				    						var name = checked[elem].name
-				    						var id = checked[elem].id
-								    		var tr = $('<tr></tr>')
-								    		var td = $('<td></td>')
-								    		var button = $('<button class="remove_checked_org">X</button>')
-								    		button.click(function() {
-				    							// Очищаем выбранные подразделения
-					    						$('.checked-division').remove()						    			
-								    			// Удаляем блок
-								    			$(this).context.parentNode.parentNode.remove()
-								    		})
-								    		td.append(button)
-								    		tr.addClass('checked-org')
-								    		tr.append('<td data-org-id="' + id + '">' + name + '</td>')
-								    		tr.append(td)
-			    							$('#search-module__org').after(tr)			    						
-				    					}
-				    				}
-
-				    				$('#org-module').hide()
-					    		});
-							}
-						});
-
-						setTimeout(function() {
-			    			$('#org-module').show()
-						}, 200);	
-				    });
-
-		       		// Подразделения
-		    		$('#division-button').click(function() {
-		    			 $('#shade-module').css({'z-index': 2});
-
-						var already_checked = []
-
-			    		$.each( $('[data-org-id]'), function(key, value) {
-			    			already_checked.push($(this).data('orgId'))
-			    		})
-
-						$.ajax({
-							type: "POST",
-							url: "/pp/Ext/extjs_json_collection_data.html",
-							dataType: "json",
-							data: {
-								collection_code: "rc_task_finally_division",
-
-								// Добавляем переменную checked в выборке
-								parameters: 'checked=' + already_checked.toString()
-							},
-							success: function (data, textStatus, jqXHR) {
-
-								// Обнуляем #find-division-module
-								$('#find-division-module').text('')
-
-								// Проверяем какие элементы уже выбраны .checked-division
-								var already_checked = []
-
-
-					    		$.each( $('[data-division-id]'), function(key, value) {
-					    			already_checked.push($(this).data('divisionId'))
+						var label = $('<label for="' + id + '">"' + name + '"</label><br>')
+			    		$('#find-org-module').append(input)					
+			    		$('#find-org-module').append(label)					
+					}
+					// После добавления всех checkbox
+		    		$('#find-org-module').append(button)		
+		    						
+		    		$('#org-search').click(function() {	
+	    				$('#shade-module').css({'z-index': 0});
+	    				// Очищаем выбранные подразделения
+		    			$('.checked-division').remove()
+	    				// Выбранные элементы
+	    				var checked = []
+	    				$.each($('[name="org"]'), function() {
+	    					if ($(this).context.checked) {
+								checked.push({
+	    							id: $(this).context.id,
+	    							name: $(this).context.value
+	    						})
+	    					}
+	    				})
+	    				// Массив из объектов выбранных элементов 
+	    				// {id: "6537284716620812580", name: "Yandex"}
+	    				// Если есть checked - прорисовываем
+	    				if (checked.length > 0) {
+	    					// Вставляем выбранные элементы после #search-module__org
+	    					// Очищаем от старых значений
+							$('.checked-org').remove()
+	    					
+	    					for (elem in checked) {
+	    						var name = checked[elem].name
+	    						var id = checked[elem].id
+					    		var tr = $('<tr>')
+					    		var td = $('<td></td>')
+					    		var button = $('<button class="remove_checked_org">X</button>')
+					    		button.click(function() {
+	    							// Очищаем выбранные подразделения
+		    						$('.checked-division').remove()						    			
+					    			// Удаляем блок
+					    			$(this).context.parentNode.parentNode.remove()
 					    		})
+					    		td.append(button)
+					    		tr.addClass('checked-org')
+					    		tr.append('<td data-org-id="' + id + '">' + name + '</td>')
+					    		tr.append(td)
+    							$('#search-module__org').after(tr)			    						
+	    					}
+	    				}
+	    				$('#org-module').hide()
+		    		});
+				}
+			});
+			setTimeout(function() {
+    			$('#org-module').show()
+			}, 200);	
+	    });
+   		// Подразделения
+		$('#division-button').click(function() {
+			 $('#shade-module').css({'z-index': 2});
+			var already_checked = []
+    		$.each( $('[data-org-id]'), function(key, value) {
+    			already_checked.push($(this).data('orgId'))
+    		})
+			$.ajax({
+				type: "POST",
+				url: "/pp/Ext/extjs_json_collection_data.html",
+				dataType: "json",
+				data: {
+					collection_code: "rc_task_finally_division",
+					// Добавляем переменную checked в выборке
+					parameters: 'checked=' + already_checked.toString()
+				},
+				success: function (data, textStatus, jqXHR) {
+					// Обнуляем #find-division-module
+					$('#find-division-module').text('')
+					// Проверяем какие элементы уже выбраны .checked-division
+					var already_checked = []
+		    		$.each( $('[data-division-id]'), function(key, value) {
+		    			already_checked.push($(this).data('divisionId'))
+		    		})
+					// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
+					var button = $('<button id="division-search">Выбрать</button>')
+					for (elem in data.results) {
+						var id = data.results[elem].id
+						var name = data.results[elem].name
+						var input = $('<input type="checkbox" name="division" value="' + name + '" id="' + id + '" />')
+						if(already_checked.indexOf(id) != -1) {
+							input.prop('checked', true);								
+						}
+						var label = $('<label for="' + id + '">"' + name + '"</label><br>')
+			    		$('#find-division-module').append(input)					
+			    		$('#find-division-module').append(label)					
+					}
+					// После добавления всех checkbox
+		    		$('#find-division-module').append(button)					
+		    		$('#division-search').click(function() {
+		    		 		$('#shade-module').css({'z-index': 0});	    				
+		    				var checked = []
+		    				// Получаем DOM структуру #division-search
+		    				var division_search_DOM = $(this).context.parentNode.children
+		    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
+		    					if (division_search_DOM[i].checked) {
+		    						checked.push({
+		    							id: division_search_DOM[i].id,
+		    							name: division_search_DOM[i].value
+		    						})
+		    					}
+		    				}
+		    				// Массив из объектов выбранных элементов 
+		    				// {id: "6537284716620812580", name: "Yandex"}
+		    				// Если есть checked - прорисовываем
+		    				if (checked.length > 0) {
+		    					// Вставляем выбранные элементы после #search-module__division
+		    					// Очищаем от старых значений
+								$('.checked-division').remove()
+		    					
+		    					for (elem in checked) {
+		    						var id = checked[elem].id
+		    						var name = checked[elem].name
+						    		var tr = $('<tr></tr>')
+						    		var td = $('<td></td>')
+						    		var button = $('<button>X</button>')
+						    		button.click(function() {
+						    			// Удаляем блок
+						    			$(this).context.parentNode.parentNode.remove()
+						    		})
+						    		td.append(button)
+						    		tr.addClass('checked-division')
+						    		tr.append('<td data-division-id="' + id + '">' + name + '</td>')
+						    		tr.append(td)
+	    							$('#search-module__division').after(tr)						
+		    					}
+		    				}
+		    				$('#division-module').hide()
+		    		});
+				}
+			});
+			setTimeout(function() {
+    			$('#division-module').show()
+			}, 200);	
+	    });
 
-								// Прорисовка блока выбора ОРГАНИЗАЦИЙ =====================
-								var button = $('<button id="division-search">Выбрать</button>')
+	    $('#search').click(search);
+	    
+	    // Выгрузка
+	    $('#excel-load').click(function() {
+	    	// Убираем столбец с id 
+	    	// $('.clb-id').remove()
 
-								for (elem in data.results) {
-									var id = data.results[elem].id
-									var name = data.results[elem].name
-									var input = $('<input type="checkbox" name="division" value="' + name + '" id="' + id + '" />')
-									if(already_checked.indexOf(id) != -1) {
-										input.prop('checked', true);								
-									}
+	    	// Создание клиентского Excel, мой вариант 
+	    	// tableToExcel('filter-table', 'W3C Example Table')
 
-									var label = $('<label for="' + id + '">"' + name + '"</label><br>')
+	    	// EXCEL
+			$("#excel_form").submit();
+			return false;
 
-						    		$('#find-division-module').append(input)					
-						    		$('#find-division-module').append(label)					
-								}
+	    });
 
-								// После добавления всех checkbox
-					    		$('#find-division-module').append(button)					
+	    function navigator_buttons(number_of_items, items_on_page) {
+	    	$('#navigator').text('')
+	    	var number_of_pages = Math.ceil(number_of_items / items_on_page)
 
-					    		$('#division-search').click(function() {
-					    		 		$('#shade-module').css({'z-index': 0});	    				
+	    	for(var i = 1, max = number_of_pages; i < max; i++) {
+					var button = $('<button id="navigator-page-' + i + '">' + i + '</button>')
+					if (i === 1) {
+						button.addClass("current-page")
+					}
+					if (i > 5) {
+			    		var forward = $('<button id="forward">Вперед</button>')
+						$('#navigator').append(forward)
+						break;
+					}
+					$('#navigator').append(button)	    		
+	    	}
+	    }
+
+	});
+</script>
 
 
-					    				var checked = []
-					    				// Получаем DOM структуру #division-search
-					    				var division_search_DOM = $(this).context.parentNode.children
-					    				for (var i = 0, max = division_search_DOM.length; i < max; i++) {
-					    					if (division_search_DOM[i].checked) {
-					    						checked.push({
-					    							id: division_search_DOM[i].id,
-					    							name: division_search_DOM[i].value
-					    						})
-					    					}
-					    				}
-					    				// Массив из объектов выбранных элементов 
-					    				// {id: "6537284716620812580", name: "Yandex"}
+<script>
+    // сортировка таблицы
+    var grid = document.getElementById('filter-table');
+    grid.onclick = function(e) {
+      if (e.target.tagName != 'TH') return;
+      // Если TH -- сортируем
+      sortGrid(e.target.cellIndex, e.target.getAttribute('data-type'));
+    };
+    function sortGrid(colNum, type) {
+      var tbody = grid.getElementsByTagName('tbody')[0];
+      console.log(tbody)
+      // Составить массив из TR
+      var rowsArray = [].slice.call(tbody.rows);
+      console.log(rowsArray)
+      // определить функцию сравнения, в зависимости от типа
+      var compare;
+      switch (type) {
+        case 'number':
+          compare = function(rowA, rowB) {
+            return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML;
+          };
+          break;
+        case 'string':
+          compare = function(rowA, rowB) {
+          	console.log(1, rowA.cells[colNum].textContent)
+          	console.log(2, rowB.cells[colNum].textContent)
+            return rowA.cells[colNum].textContent > rowB.cells[colNum].textContent;
+          };
+          break;
+      }
+      // сортировать
+      rowsArray.sort(compare);
+      // Убрать tbody из большого DOM документа для лучшей производительности
+      grid.removeChild(tbody);
+      // добавить результат в нужном порядке в TBODY
+      // они автоматически будут убраны со старых мест и вставлены в правильном порядке
+      for (var i = 0; i < rowsArray.length; i++) {
+        tbody.appendChild(rowsArray[i]);
+      }
+      grid.appendChild(tbody);
+    }
+</script>
 
-					    				// Если есть checked - прорисовываем
-					    				if (checked.length > 0) {
-					    					// Вставляем выбранные элементы после #search-module__division
 
-					    					// Очищаем от старых значений
-											$('.checked-division').remove()
-					    					
-					    					for (elem in checked) {
-					    						var id = checked[elem].id
-					    						var name = checked[elem].name
-									    		var tr = $('<tr></tr>')
-									    		var td = $('<td></td>')
-									    		var button = $('<button>X</button>')
-									    		button.click(function() {
-									    			// Удаляем блок
-									    			$(this).context.parentNode.parentNode.remove()
-									    		})
-									    		td.append(button)
-									    		tr.addClass('checked-division')
-									    		tr.append('<td data-division-id="' + id + '">' + name + '</td>')
-									    		tr.append(td)
-				    							$('#search-module__division').after(tr)						
-					    					}
-					    				}
-					    				$('#division-module').hide()
-					    		});
-
-							}
-						});
-						setTimeout(function() {
-			    			$('#division-module').show()
-						}, 200);	
-				    });			
-
-				    $('#search').click(search);
-				});
-			</script>
-			<script>
-			    // сортировка таблицы
-			    var grid = document.getElementById('filter-table');
-
-			    grid.onclick = function(e) {
-			      if (e.target.tagName != 'TH') return;
-
-			      // Если TH -- сортируем
-			      sortGrid(e.target.cellIndex, e.target.getAttribute('data-type'));
-			    };
-
-			    function sortGrid(colNum, type) {
-			      var tbody = grid.getElementsByTagName('tbody')[0];
-			      console.log(tbody)
-			      // Составить массив из TR
-			      var rowsArray = [].slice.call(tbody.rows);
-			      console.log(rowsArray)
-
-			      // определить функцию сравнения, в зависимости от типа
-			      var compare;
-
-			      switch (type) {
-			        case 'number':
-			          compare = function(rowA, rowB) {
-			            return rowA.cells[colNum].innerHTML - rowB.cells[colNum].innerHTML;
-			          };
-			          break;
-			        case 'string':
-			          compare = function(rowA, rowB) {
-			          	console.log(1, rowA.cells[colNum].textContent)
-			          	console.log(2, rowB.cells[colNum].textContent)
-			            return rowA.cells[colNum].textContent > rowB.cells[colNum].textContent;
-			          };
-			          break;
-			      }
-
-			      // сортировать
-			      rowsArray.sort(compare);
-
-			      // Убрать tbody из большого DOM документа для лучшей производительности
-			      grid.removeChild(tbody);
-
-			      // добавить результат в нужном порядке в TBODY
-			      // они автоматически будут убраны со старых мест и вставлены в правильном порядке
-			      for (var i = 0; i < rowsArray.length; i++) {
-			        tbody.appendChild(rowsArray[i]);
-			      }
-
-			      grid.appendChild(tbody);
-
-			    }
-			  </script>
-		</body>
-</html>
+<!-- ВЫГРУЗКА -->
+<script type="text/javascript">
+	var tableToExcel = (function() {
+	  var uri = 'data:application/vnd.ms-excel;base64,'
+	    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+	    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+	    , format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+	  return function(table, name) {
+	    if (!table.nodeType) table = document.getElementById(table)
+	    var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML}
+	    window.location.href = uri + base64(format(template, ctx))
+	  }
+	})()
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<style>	
+	.search-and-excel {
+		margin-top: 5px;
+	}
+	.search-module {
+		width: 80%;
+		margin: 0 auto;
+		background: lightblue;
+		border: 1px solid black;
+		position: relative;
+		z-index: 1;
+		padding: 5px;
+	}
+	.navigator {
+		width: 80%;
+		margin: 10px auto;
+		background: white;
+		text-align: center;
+	}
+	.org-module,
+	.division-module,
+	.clb-info {
+		background: khaki;
+		border: 1px solid black;
+		position: absolute;
+		top: 80px;	
+		left: 160px;
+		z-index: 5;
+		width: 80%;
+		padding: 5px;
+	}
+	.clb {
+		cursor: pointer;
+	}
+	.result {
+		width: 80%;
+		margin: 10px auto;
+		position: relative;
+		z-index: 1;
+		background: white;
+	}
+	.clb-info__table td{
+		width: 40%;
+	}
+	.clb-id,
+	#clb-info__table--id {
+		display: none;
+	}
+	
+	.clb-update-org,
+	.clb-update-division {
+		background: lightgreen;
+		border: 1px solid black;
+		position: absolute;
+		top: 80px;	
+		left: 160px;
+		z-index: 20;
+		width: 40%;
+		padding: 5px;
+	}
+	.shade-module {
+		background: rgba(123, 123, 43, .3);
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		z-index: 0;
+		top: 0;
+		left: 0;
+	}
+	/* ДОП */
+    #filter-table{
+        width: 100%;
+    }
+    #filter-table th{
+        background-color: #dadada;
+    }
+    #filter-table td, #filter-table th{
+        padding: 5px;
+        border-bottom: 1px solid #ccc;
+    }
+    th {
+    	cursor: pointer;
+    }
+</style>
