@@ -50,13 +50,6 @@
 </div>
 <!-- NAVIGATOR -->
 <div id="navigator" class="navigator">
-<!-- 	<button>Назад</button>
-	<button>1</button>
-	<button>2</button>
-	<button>3</button>
-	<button>4</button>
-	<button>5</button>
-	<button>Вперед</button> -->
 </div>
 <!-- MODAL -->
 <div id="clb-info" class="clb-info">
@@ -125,9 +118,14 @@
     <input type="hidden" name="org" id="excel_org" value="" />
     <input type="hidden" name="division" id="excel_division" value="" />
 </form>	
+<!-- КОЛИЧЕСТВО элементов в выборке -->
 <div id="temp"></div>
 <script>
 	$( document ).ready(function() {
+		// Хранит результаты поиска
+		// Принимает значения из search
+		var select_items_in_search;
+
 		// Поиск результатов
 		var search = function() {
 			$('.table-data').remove()
@@ -142,6 +140,14 @@
     		$.each( $('[data-division-id]'), function(key, value) {
     			divisions.push($(this).data('divisionId'))
     		})
+
+			select_items_in_search = {
+				fullname: fullname,
+				position: position, 
+				org: orgs.toString(),
+				division: divisions.toString()
+			}
+
     		// Заполнение формы для EXCEL
 			$("#excel_fullname").val(fullname); // ? если не заполнено 
 			$("#excel_position").val(position);
@@ -162,7 +168,14 @@
 				}
 			});
 
-	    	// Обращение к выборке
+	    	// ПЕРВОНАЧАЛЬНЫЙ ЗАПУСК
+			// current_page - Выбранная страница
+			var current_page = 1			
+			// limit - сколько элементов выводить на страницу
+			var limit = 3;
+			// start - с какого элемента начать показ
+			var start = (current_page - 1) * limit;
+			
 			$.ajax({
 				type: "POST",
 				url: "/pp/Ext/extjs_json_collection_data.html",
@@ -171,13 +184,12 @@
 					collection_code: "rc_task_finally",
 					parameters: "fullname=" + fullname + ";position=" + position + ";org=" + orgs.toString() + ";division=" + divisions.toString(),
 					// C какого элемента начать, начиная с 0
-					start: 0,
+					start: start,
 					// Количество выведенных на экран
-					limit: 1
+					limit: limit
 				},
 				success: function (data, textStatus, jqXHR) {
 					// Прорисовка таблицы =====================
-					// console.log(data.results.length)
 					for (elem in data.results) {
 					    var tr = $('<tr></tr>')
 					    tr.addClass('table-data')
@@ -202,11 +214,12 @@
 					    	
 					    	tr.append(td)
 					    }		
-			    		// $('#filter-table').append(tr)					
 			    		$('#tbody').append(tr)					
 					}
 				}
 			});
+			// ============================================================================
+
 			// Обработка ajax
 			setTimeout(function() {
 				$('#result').show()
@@ -215,12 +228,201 @@
 					// http://qaru.site/questions/26952/export-dynamic-html-table-to-excel-in-javascript-in-firefox-browser
 					$('#excel').show()
 					// !!! 
-					navigator_buttons($('#temp').text(), 1) 
+					navigator_buttons($('#temp').text(), limit) 
 				} else {
 					$('#excel').hide()
 				}
 			}, 200);
 		}
+
+		// кнопки НАВИГАЦИИ
+		$(document).on('click touchend', '.navigator-button', function() {
+			
+			// ПАГИНАЦИЯ ===============================================================
+			// Выбранная страница
+			var selected_page = $(this).text()
+
+			// Текущая страница
+			var current_page = +$('#current-page').text()	
+
+			if (selected_page === "Назад") {
+				if ($('#current-page').prev().text() === "Назад" && current_page - 1 >= 1) {
+					var button = $('<button>')
+						.text(current_page - 1)
+						.addClass("navigator-button")
+						.insertAfter($('#back'));
+					$('#forward').prev().remove()
+				} 
+				$('#current-page').attr('id', '_temp');;
+				$("#_temp").prev().attr('id', 'current-page');
+				$('#_temp').first().removeAttr("id");
+				current_page -=1
+
+			} else if (selected_page === "Вперед") {
+				$("#current-page").next().attr('id', 'current-page');
+				if (current_page + 5 <= paginator.end) {
+					$('#current-page').eq(0).remove();
+					var button = $('<button>')
+						.text(current_page + 5)
+						.addClass("navigator-button")
+						.insertBefore($('#forward'));
+				} else {
+					$('#current-page').eq(0).removeAttr("id");
+				}
+				current_page +=1
+
+			// Если выбрана страница напрямую, страниц больше 5
+			} else if (paginator.end > 5) {
+				current_page = +selected_page				
+				paginator.start = current_page
+			
+				// Сколько ставить элементов после
+				var items_after = (paginator.end - current_page > 0) ? (paginator.end - current_page > 4) ? 4 : paginator.end - current_page : 0;
+				// Сколько ставить элементов до
+				var items_before = 4 - items_after
+
+				$('.navigator-button').remove()
+
+	    		var back = $('<button>')
+	    			.attr("id", "back")
+	    			.text('Назад')
+	    			.addClass("navigator-button");
+				$('#navigator').prepend(back)				
+
+	    		var forward = $('<button>')
+	    			.attr("id", "forward")
+	    			.text('Вперед')
+	    			.addClass("navigator-button");
+				$('#navigator').append(forward)
+				
+				var button = $('<button>')
+					.text(current_page)
+					.addClass("navigator-button")
+					.attr('id', 'current-page')
+					.insertAfter($('#back'));
+
+				// Добавить после
+				for(var i = current_page, max = current_page + items_after; i < max; i++) {
+					var button = $('<button>')
+						.text(i + 1)
+						.addClass("navigator-button")
+						.insertBefore($('#forward'));			
+				}
+
+				// Добавить до 
+				for(var i = current_page, min = current_page - items_before; i > min; i--) {
+					var button = $('<button>')
+						.text(i - 1)
+						.addClass("navigator-button")
+						.insertAfter($('#back'));
+				}
+
+			// Если выбрана страница напрямую, страниц меньше 5	
+			} else {
+				$('#current-page').removeAttr("id");
+				$(this).attr('id', 'current-page');
+				current_page = +selected_page	
+			}
+			
+			paginator.start = current_page
+
+			if(paginator.start == 1) {
+				$('#back').remove()
+			}
+
+			if(paginator.start != 1 && !$("button").is("#back") && paginator.end > 5) {
+	    		var back = $('<button>')
+	    			.attr("id", "back")
+	    			.text('Назад')
+	    			.addClass("navigator-button");
+				$('#navigator').prepend(back)
+			}
+
+			if(paginator.end === current_page) {
+				$('#forward').hide()
+			} else {
+				$('#forward').show()				
+			}
+			// ========================================================================
+
+			var limit = 3;
+			var start = (current_page - 1) * limit;
+
+			$('.table-data').remove()
+
+			$.ajax({
+				type: "POST",
+				url: "/pp/Ext/extjs_json_collection_data.html",
+				dataType: "json",
+				data: {
+					collection_code: "rc_task_finally",
+					parameters: "fullname=" + select_items_in_search.fullname + ";position=" + select_items_in_search.position + ";org=" + select_items_in_search.org + ";division=" + select_items_in_search.division,
+					start: start,
+					limit: limit
+				},
+				success: function (data, textStatus, jqXHR) {
+					// Прорисовка таблицы =====================
+					for (elem in data.results) {
+					    var tr = $('<tr></tr>')
+					    tr.addClass('table-data')
+					    for(var i = 0; i < 5; i++) {
+					    	var td = $('<td></td>')
+					    	if (i === 0) {
+					    		td.addClass('clb-id')
+					    			.attr('id', data.results[elem].id )
+					    			.text(data.results[elem].id)
+					    	} else if (i === 1) {
+					    		td.addClass('clb')
+					    		td.text(data.results[elem].fullname)
+					    	} else if (i === 2) {
+					    		td.text(data.results[elem].position)
+					    	} else if (i === 3) {
+					    		td.text(data.results[elem].org)
+					    		td.attr("data-info-org-id", data.results[elem].org_id || "");
+					    	} else if (i === 4) {
+					    		td.text(data.results[elem].division)
+					    		td.attr("data-info-division-id", data.results[elem].division_id || "");
+					    	}		 			
+					    	
+					    	tr.append(td)
+					    }		
+			    		$('#tbody').append(tr)					
+					}
+				}
+			});
+		}); 
+
+		// Отрисовка навигации при поиске 
+		// number_of_items - количество элементов в выбоке 
+	    function navigator_buttons(number_of_items, items_on_page) {
+	    	$('#navigator').text('')
+	    	console.log(number_of_pages, items_on_page)
+	    	var number_of_pages = Math.ceil(number_of_items / items_on_page)
+	    	// paginator.end = number_of_pages
+
+	    	for(var i = 1, max = number_of_pages; i <= max; i++) {
+					var button = $('<button>')
+						.text(i)
+						.addClass("navigator-button");
+					if (i === 1) {
+						button.attr("id", "current-page")
+					}
+					if (i > 5) {
+			    		var forward = $('<button>')
+			    			.attr("id", "forward")
+			    			.text('Вперед')
+			    			.addClass("navigator-button");
+						$('#navigator').append(forward)
+						break;
+					}
+					$('#navigator').append(button)	    		
+	    	}
+	    	return paginator = {
+				start: 1,
+				end: number_of_pages
+	    	}
+	    }
+
 		// Для удаленного действия
 		remoteAction = function (actionObject) {
 			try {
@@ -520,9 +722,10 @@
 			remoteAction(regAction);					
 		});
 		// Скрываем блоки выбора 
-		$.each(['org-module', 'division-module', 'result', 'clb-info', 'clb-update-org', 'clb-update-division', 'excel'], function(index, value) {
+		$.each(['org-module', 'division-module', 'result', 'clb-info', 'clb-update-org', 'clb-update-division', 'excel', 'temp'], function(index, value) {
 			$('#' + value).hide()
 		});
+
    		// ВЫБОРКИ ============================
    		// Организации
 	    $('#org-button').click(function() {
@@ -611,7 +814,7 @@
 	    });
    		// Подразделения
 		$('#division-button').click(function() {
-			 $('#shade-module').css({'z-index': 2});
+			$('#shade-module').css({'z-index': 2});
 			var already_checked = []
     		$.each( $('[data-org-id]'), function(key, value) {
     			already_checked.push($(this).data('orgId'))
@@ -694,6 +897,7 @@
     			$('#division-module').show()
 			}, 200);	
 	    });
+
 	    $('#search').click(search);
 	    
 	    // Выгрузка
@@ -706,31 +910,11 @@
 			$("#excel_form").submit();
 			return false;
 	    });
-	    function navigator_buttons(number_of_items, items_on_page) {
-	    	$('#navigator').text('')
-	    	var number_of_pages = Math.ceil(number_of_items / items_on_page)
-	    	console.log(number_of_items)
-	    	for(var i = 1, max = number_of_pages; i <= max; i++) {
-					var button = $('<button id="navigator-page-' + i + '">' + i + '</button>')
-						.addClass("navigator-button");
-					if (i === 1) {
-						button.addClass("current-page")
-					}
-					if (i > 5) {
-			    		var forward = $('<button id="forward">Вперед</button>')
-			    			.addClass("navigator-button");
-						$('#navigator').append(forward)
-						break;
-					}
-					$('#navigator').append(button)	    		
-	    	}
-	    }
+
 	});
 </script>
-
-
+<!-- Сортировка таблицы -->
 <script>
-    // сортировка таблицы
     var grid = document.getElementById('filter-table');
     grid.onclick = function(e) {
       if (e.target.tagName != 'TH') return;
@@ -739,10 +923,8 @@
     };
     function sortGrid(colNum, type) {
       var tbody = grid.getElementsByTagName('tbody')[0];
-      console.log(tbody)
       // Составить массив из TR
       var rowsArray = [].slice.call(tbody.rows);
-      console.log(rowsArray)
       // определить функцию сравнения, в зависимости от типа
       var compare;
       switch (type) {
@@ -753,8 +935,6 @@
           break;
         case 'string':
           compare = function(rowA, rowB) {
-          	console.log(1, rowA.cells[colNum].textContent)
-          	console.log(2, rowB.cells[colNum].textContent)
             return rowA.cells[colNum].textContent > rowB.cells[colNum].textContent;
           };
           break;
@@ -771,8 +951,6 @@
       grid.appendChild(tbody);
     }
 </script>
-
-
 <!-- ВЫГРУЗКА -->
 <script type="text/javascript">
 	var tableToExcel = (function() {
@@ -812,7 +990,7 @@
 	.navigator-button {
 		margin: 0 3px;
 	}
-	.current-page {
+	#current-page {
 		background: lightgreen;
 	}
 	.org-module,
